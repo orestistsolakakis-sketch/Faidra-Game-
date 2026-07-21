@@ -1,0 +1,74 @@
+name: Deploy Web Build to GitHub Pages
+
+# Builds the Godot web export and publishes it to GitHub Pages, giving a live,
+# playable link that refreshes on every push. Requires (one-time, in the repo):
+#   Settings -> Pages -> "Build and deployment" -> Source: "GitHub Actions".
+# If the github-pages environment restricts branches, allow this branch too
+# (Settings -> Environments -> github-pages), or run this on the default branch.
+
+on:
+  push:
+    branches:
+      - claude/indie-adventure-game-28fpz7
+      - main
+  workflow_dispatch:  # lets you trigger it manually from the Actions tab
+
+# Permissions the Pages deploy needs.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Only one Pages deploy at a time; newer pushes cancel in-progress ones.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+env:
+  GODOT_VERSION: "4.3"
+
+jobs:
+  build:
+    name: Export web build
+    runs-on: ubuntu-latest
+    # Headless Godot + matching export templates, all preinstalled in this image.
+    container:
+      image: barichello/godot-ci:4.3
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install export templates
+        # Move the image's templates into the effective HOME (container jobs set
+        # HOME=/github/home, where Godot looks). Harmless if they're already there.
+        run: |
+          mkdir -p ~/.local/share/godot/export_templates
+          mv /root/.local/share/godot/export_templates/${GODOT_VERSION}.stable \
+             ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable || true
+
+      - name: Export Web
+        run: |
+          mkdir -p build/web
+          # Import resources first so a fresh checkout has its import cache.
+          godot --headless --import . || true
+          godot --headless --verbose --export-release "Web" build/web/index.html
+
+      - name: Fix file permissions for Pages
+        run: chmod -c -R +rX build/web
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/web
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
