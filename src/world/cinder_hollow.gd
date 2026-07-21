@@ -6,6 +6,7 @@ extends Node3D
 ## palette and lighting until real assets exist (docs/ART_DIRECTION.md).
 
 const Blockout := preload("res://src/player/character_blockout.gd")
+const Spinner := preload("res://src/world/spinner.gd")
 
 const WARM := Color(1.0, 0.72, 0.38)
 const FORGE := Color(1.0, 0.5, 0.2)
@@ -89,6 +90,71 @@ func _build_district() -> void:
 
 	# Bram — Arlen's friend — stands near his interaction spot, in a warmer coat.
 	_npc(Vector3(2.2, 0, 4.2), Color(0.5, 0.34, 0.2))
+
+	# --- Ambient life: spinning fans and drifting steam ---
+	_fan(Vector3(-6.7, 4.5, 6), Vector3(0, 0, 1))
+	_fan(Vector3(6.7, 5.5, -8), Vector3(0, 0, 1))
+	_fan(Vector3(-6.7, 3.5, -14), Vector3(0, 0, 1))
+	for z in [8.0, 0.0, -8.0, -16.0]:
+		_steam(Vector3(_rng.randf_range(-3.0, 3.0), 0.2, z))
+	_steam(Vector3(0, 0.5, -22))  # steam bleeding from the dead lift
+
+
+func _fan(pos: Vector3, axis: Vector3) -> void:
+	var spinner := Spinner.new()
+	spinner.spin_axis = axis
+	spinner.speed = _rng.randf_range(2.0, 4.0)
+	spinner.position = pos
+	# Housing ring + four blades.
+	var housing := CylinderMesh.new()
+	housing.top_radius = 1.3
+	housing.bottom_radius = 1.3
+	housing.height = 0.15
+	var ring := MeshInstance3D.new()
+	ring.mesh = housing
+	ring.material_override = _mat(STONE)
+	ring.rotation.x = PI * 0.5
+	spinner.add_child(ring)
+	for i in 4:
+		var blade := MeshInstance3D.new()
+		var bm := BoxMesh.new()
+		bm.size = Vector3(0.18, 1.1, 0.05)
+		blade.mesh = bm
+		blade.material_override = _mat(COPPER)
+		blade.rotation.z = i * PI * 0.5
+		spinner.add_child(blade)
+	add_child(spinner)
+
+
+func _steam(pos: Vector3) -> void:
+	var p := GPUParticles3D.new()
+	p.amount = 18
+	p.lifetime = 2.6
+	p.position = pos
+	p.local_coords = false
+
+	var mat := ParticleProcessMaterial.new()
+	mat.direction = Vector3(0, 1, 0)
+	mat.spread = 12.0
+	mat.initial_velocity_min = 0.8
+	mat.initial_velocity_max = 1.5
+	mat.gravity = Vector3(0, 0.3, 0)
+	mat.scale_min = 0.6
+	mat.scale_max = 1.6
+	p.process_material = mat
+
+	var quad := QuadMesh.new()
+	quad.size = Vector2(0.7, 0.7)
+	var qmat := StandardMaterial3D.new()
+	qmat.albedo_color = Color(0.8, 0.85, 0.9, 0.12)
+	qmat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	qmat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	qmat.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+	quad.material = qmat
+	p.draw_pass_1 = quad
+
+	add_child(p)
+	p.emitting = true
 
 
 func _building(base: Vector3) -> void:
