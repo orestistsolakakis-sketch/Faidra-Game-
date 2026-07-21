@@ -167,6 +167,13 @@ public partial class PlaceholderArea : Node3D
             case Key.D: // start the argument dialogue scene
                 StartArgumentScene();
                 break;
+            case Key.F5: // quicksave
+                Lumenfall.Narrative.Save.SaveSystem.Save(w);
+                break;
+            case Key.F9: // quickload
+                if (Lumenfall.Narrative.Save.SaveSystem.Load(w))
+                    RefreshReadout(); // restores fire no signals, so refresh manually
+                break;
         }
     }
 
@@ -274,7 +281,8 @@ public partial class PlaceholderArea : Node3D
             ? "PAUSED\n[Esc] resume   [Backspace] main menu"
             : "Placeholder Area\n[Esc] pause   [Backspace] menu\n\n" +
               "SIM:  [T] +1 day  [G] generator fails  [1] repair  [2] ignore  [L] leave\n" +
-              "      [3] warm moment  [4] a hurt  [K] discover affair  [D] start dialogue";
+              "      [3] warm moment  [4] a hurt  [K] discover affair  [D] dialogue\n" +
+              "      [F5] quicksave   [F9] quickload";
     }
 
     private void RefreshReadout()

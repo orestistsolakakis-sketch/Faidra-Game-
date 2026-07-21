@@ -134,6 +134,13 @@ timed countdown. Memory & knowledge reuse `WorldState` flags. Scenes are kept in
 a **`DialogueLibrary`**; content in `Dialogue/Content/`. The cinematic UI is
 deferred to the GameMode/UI pass; the harness plays scenes as text.
 
+### Save/Load (`src/Narrative/Save/`)
+`SaveData` bundles every system's `Snapshot()` plus metadata; `SaveSystem` writes
+it as JSON under `user://saves/` (Godot FileAccess, enums as names). `World.
+CaptureSave()` builds it; `World.LoadGame()` re-registers content then restores
+each system. Small by design — every system was serializable from day one, so
+saving is a shallow copy, not a bespoke traversal.
+
 ### `World` (`src/Narrative/World.cs`) — autoload
 Facade owning `Clock`, `State`, `Relationships`, `Personality`, `Events`,
 `Dialogue` (library) and `DialogueRunner`, re-broadcasting
@@ -175,8 +182,8 @@ multi-value relationship model that most of these serve.
    `Personality` model): data-driven graph applying effects to state.
 6. **GameMode layer** — Cinematic / Exploration / Interactive-Cinematic /
    Decision, including timed choices; extends `GameManager`.
-7. **Save/Load** — serialise WorldState + WorldClock + RelationshipModel +
-   progress (tractable *because* the above are plain data).
+7. ~~**Save/Load**~~ — **implemented** (`src/Narrative/Save/`): one JSON bundle of
+   every system's snapshot; tractable *because* the above are plain data.
 
 **Later:** Quests/Journal, Inventory/Crafting, Skill Tree, Lore Database,
 Achievements.

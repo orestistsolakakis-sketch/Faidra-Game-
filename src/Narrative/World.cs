@@ -1,10 +1,12 @@
 using Godot;
+using Lumenfall.Core;
 using Lumenfall.Narrative.Dialogue;
 using Lumenfall.Narrative.Dialogue.Content;
 using Lumenfall.Narrative.Events;
 using Lumenfall.Narrative.Events.Content;
 using Lumenfall.Narrative.Personality;
 using Lumenfall.Narrative.Relationships;
+using Lumenfall.Narrative.Save;
 
 namespace Lumenfall.Narrative;
 
@@ -139,9 +141,7 @@ public partial class World : Node
         Personality.Reset();
         Dialogue.Clear();
 
-        // Register authored content. (Later this can be data-driven.)
-        CinderHollowEvents.RegisterInto(Events);
-        ArlenLysandraScenes.RegisterInto(Dialogue);
+        RegisterContent();
 
         // Seed opening world conditions.
         State.SetValue(WorldFacts.Values.HeartEngineStability, 100);
@@ -160,5 +160,44 @@ public partial class World : Node
 
         Events.Evaluate();
         GD.Print($"[World] New game. {Clock.ToDisplayString()}");
+    }
+
+    /// <summary>Register all authored content (events + dialogue). Shared by new-game and load.</summary>
+    private void RegisterContent()
+    {
+        CinderHollowEvents.RegisterInto(Events);
+        ArlenLysandraScenes.RegisterInto(Dialogue);
+    }
+
+    /// <summary>Bundle the whole simulation into a serializable snapshot for saving.</summary>
+    public SaveData CaptureSave() => new(
+        SaveData.CurrentVersion,
+        System.DateTime.UtcNow.ToString("o"),
+        Clock.ToDisplayString(),
+        Clock.Snapshot(),
+        State.Snapshot(),
+        Events.Snapshot(),
+        Relationships.Snapshot(),
+        Personality.Snapshot());
+
+    /// <summary>
+    /// Restore the simulation from a save. Content definitions are re-registered
+    /// first (they aren't saved), then each system's runtime state is restored.
+    /// Restores fire no change signals, so callers should refresh any UI manually.
+    /// </summary>
+    public void LoadGame(SaveData data)
+    {
+        Events.Reset();
+        Dialogue.Clear();
+        RegisterContent();
+
+        Clock.Restore(data.Clock);
+        State.Restore(data.State);
+        Events.Restore(data.Events);
+        Relationships.Restore(data.Relationships);
+        Personality.Restore(data.Personality);
+
+        GameManager.Instance?.SetState(GameState.Playing);
+        GD.Print($"[World] Loaded. {Clock.ToDisplayString()}");
     }
 }
