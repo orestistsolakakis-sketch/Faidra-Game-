@@ -1,6 +1,9 @@
 using Godot;
+using Lumenfall.Narrative.Dialogue;
+using Lumenfall.Narrative.Dialogue.Content;
 using Lumenfall.Narrative.Events;
 using Lumenfall.Narrative.Events.Content;
+using Lumenfall.Narrative.Personality;
 using Lumenfall.Narrative.Relationships;
 
 namespace Lumenfall.Narrative;
@@ -29,16 +32,30 @@ public partial class World : Node
     /// <summary>The authoritative fact store (flags + values).</summary>
     public WorldState State { get; } = new();
 
-    /// <summary>Character relationships (Trust/Understanding/Attraction/Resentment/Dependence).</summary>
+    /// <summary>Character relationships (Trust/Understanding/Attraction/Resentment/Vulnerability/Dependence).</summary>
     public RelationshipModel Relationships { get; } = new();
+
+    /// <summary>Emergent character personalities shaped by dialogue choices.</summary>
+    public PersonalityModel Personality { get; } = new();
 
     /// <summary>The living-world engine: events that activate, expire, and chain.</summary>
     public EventManager Events { get; }
 
+    /// <summary>Registry of authored dialogue scenes.</summary>
+    public DialogueLibrary Dialogue { get; } = new();
+
+    /// <summary>Runs one dialogue scene at a time against the live world.</summary>
+    public DialogueRunner DialogueRunner { get; }
+
     public World()
     {
-        // Events read and mutate the same clock, state, and relationships.
-        Events = new EventManager(Clock, State, Relationships);
+        // Every system shares the same clock, state, relationships and personality.
+        Events = new EventManager(Clock, State, Relationships, Personality);
+
+        // The dialogue runner needs the same wiring events use. A ConsequenceContext
+        // is just a reference bundle, so a dedicated one for dialogue is fine.
+        var dialogueContext = new ConsequenceContext(Clock, State, Events, Relationships, Personality);
+        DialogueRunner = new DialogueRunner(dialogueContext);
     }
 
     /// <summary>Mirror of <see cref="WorldClock.Advanced"/>. Arg: minutes added.</summary>
@@ -73,6 +90,10 @@ public partial class World : Node
     [Signal]
     public delegate void RelationshipChangedEventHandler(string characterA, string characterB, string axis);
 
+    /// <summary>A character's personality trait changed. Args: character id, trait id.</summary>
+    [Signal]
+    public delegate void PersonalityChangedEventHandler(string character, string trait);
+
     public override void _EnterTree()
     {
         if (Instance is not null && Instance != this)
@@ -93,8 +114,9 @@ public partial class World : Node
         Events.EventResolved += (evt, outcomeId) => EmitSignal(SignalName.EventResolved, evt.Id, outcomeId);
         Events.EventExpired += evt => EmitSignal(SignalName.EventExpired, evt.Id);
 
-        // Re-broadcast relationship changes.
+        // Re-broadcast relationship and personality changes.
         Relationships.Changed += (a, b, axis) => EmitSignal(SignalName.RelationshipChanged, a, b, axis.ToString());
+        Personality.Changed += (character, trait) => EmitSignal(SignalName.PersonalityChanged, character, trait);
 
         // The world reacts to time and facts: any change re-evaluates events.
         // (EventManager guards against re-entrancy when effects change state.)
@@ -114,9 +136,12 @@ public partial class World : Node
         State.Reset();
         Events.Reset();
         Relationships.Reset();
+        Personality.Reset();
+        Dialogue.Clear();
 
-        // Register authored event content. (Later this can be data-driven.)
+        // Register authored content. (Later this can be data-driven.)
         CinderHollowEvents.RegisterInto(Events);
+        ArlenLysandraScenes.RegisterInto(Dialogue);
 
         // Seed opening world conditions.
         State.SetValue(WorldFacts.Values.HeartEngineStability, 100);
@@ -130,6 +155,7 @@ public partial class World : Node
         Relationships.Set(Characters.Arlen, Characters.Lysandra, RelationshipAxis.Understanding, 5);
         Relationships.Set(Characters.Arlen, Characters.Lysandra, RelationshipAxis.Attraction, 0);
         Relationships.Set(Characters.Arlen, Characters.Lysandra, RelationshipAxis.Resentment, 25);
+        Relationships.Set(Characters.Arlen, Characters.Lysandra, RelationshipAxis.Vulnerability, 0);
         Relationships.Set(Characters.Arlen, Characters.Lysandra, RelationshipAxis.Dependence, 0);
 
         Events.Evaluate();

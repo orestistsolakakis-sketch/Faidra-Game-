@@ -69,6 +69,20 @@ public static class WorldFacts
 
         /// <summary>A food shortage has taken hold in Cinder Hollow.</summary>
         public const string CinderFoodShortage = "cinder_food_shortage";
+
+        // --- Dialogue: knowledge & memory flags ---
+
+        /// <summary>Arlen concealed information from Lysandra (triggers the argument scene).</summary>
+        public const string ArlenHidInfoFromLysandra = "arlen_hid_info_from_lysandra";
+
+        /// <summary>The player has uncovered evidence of King Ewald's affair (unlocks confrontations).</summary>
+        public const string HasDiscoveredEwaldAffair = "has_discovered_ewald_affair";
+
+        /// <summary>Memory: Arlen once told Lysandra that people don't change.</summary>
+        public const string ArlenSaidPeopleDontChange = "arlen_said_people_dont_change";
+
+        /// <summary>Lysandra will withhold future secrets from Arlen (a dialogue consequence).</summary>
+        public const string LysandraGuardsSecrets = "lysandra_guards_secrets";
     }
 
     /// <summary>Integer facts: "how much / how many?".</summary>

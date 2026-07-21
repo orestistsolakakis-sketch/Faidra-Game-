@@ -21,6 +21,9 @@ public enum RelationshipAxis
     /// <summary>Have they hurt each other?</summary>
     Resentment,
 
+    /// <summary>How openly do they let each other see them (fears, past, weakness)?</summary>
+    Vulnerability,
+
     /// <summary>Do they rely on each other (potentially too much)?</summary>
     Dependence,
 }

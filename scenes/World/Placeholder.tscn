@@ -34,7 +34,23 @@ horizontal_alignment = 1
 unique_name_in_owner = true
 offset_left = 32.0
 offset_top = 140.0
-offset_right = 640.0
+offset_right = 700.0
 offset_bottom = 520.0
 theme_override_font_sizes/font_size = 20
 text = "World Time: —"
+
+[node name="Dialogue" type="Label" parent="Hud"]
+unique_name_in_owner = true
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 32.0
+offset_top = -360.0
+offset_right = -32.0
+offset_bottom = -32.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_font_sizes/font_size = 24
+text = ""
+vertical_alignment = 2

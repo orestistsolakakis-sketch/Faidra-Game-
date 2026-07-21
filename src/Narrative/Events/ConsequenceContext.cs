@@ -1,3 +1,4 @@
+using Lumenfall.Narrative.Personality;
 using Lumenfall.Narrative.Relationships;
 
 namespace Lumenfall.Narrative.Events;
@@ -26,11 +27,20 @@ public sealed class ConsequenceContext
     /// <summary>Character relationships — outcomes can shift Trust, Resentment, etc.</summary>
     public RelationshipModel Relationships { get; }
 
-    public ConsequenceContext(WorldClock clock, WorldState state, EventManager events, RelationshipModel relationships)
+    /// <summary>Emergent character personalities — dialogue choices add trait weight here.</summary>
+    public PersonalityModel Personality { get; }
+
+    public ConsequenceContext(
+        WorldClock clock,
+        WorldState state,
+        EventManager events,
+        RelationshipModel relationships,
+        PersonalityModel personality)
     {
         Clock = clock;
         State = state;
         Events = events;
         Relationships = relationships;
+        Personality = personality;
     }
 }

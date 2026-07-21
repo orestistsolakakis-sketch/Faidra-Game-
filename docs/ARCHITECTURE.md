@@ -112,13 +112,37 @@ Character ids come from the **`Characters`** registry. Exposed on
 move relationship values. Pure C#, serializable; seeded at new-game to Phase 1
 "Distrust". Beats gate on *combinations* of axes, checked in content conditions.
 
+### Personality (`src/Narrative/Personality/`)
+Emergent character archetypes (docs/DIALOGUE_SYSTEM_BIBLE.md). `PersonalityModel`
+tracks per-character trait weights; dialogue choice effects `Add` to traits and
+`GetDominant` reports the archetype (Protective/Cynical/… Arlen, Diplomatic/…
+Lysandra). The player never picks — it is observed. Trait ids from the
+`PersonalityTraits` registry. Pure C#, serializable, on `ConsequenceContext`.
+
+### Dialogue (`src/Narrative/Dialogue/`)
+The data-driven conversation graph (docs/DIALOGUE_SYSTEM_BIBLE.md). A
+**`DialogueScene`** has an availability gate, a start node, and a node graph. A
+**`DialogueNode`** is a speaker line with optional **conditional text variants**
+(same beat, different words by state), either auto-advancing or offering
+**`DialogueChoice`s** — each intent-tagged, optionally condition-gated
+(knowledge/relationship), with an `Effect` over `ConsequenceContext` (relationship
++ flag/memory + personality + event changes) and a `Next`. Nodes may be timed
+(`TimeLimitSeconds` + `DefaultChoiceIndex`). The **`DialogueRunner`** walks a scene
+— resolving variant text, filtering choices, applying effects, raising
+`LineEntered`/`ChoicesOffered`/`SceneEnded`; the presenter drives pacing and the
+timed countdown. Memory & knowledge reuse `WorldState` flags. Scenes are kept in
+a **`DialogueLibrary`**; content in `Dialogue/Content/`. The cinematic UI is
+deferred to the GameMode/UI pass; the harness plays scenes as text.
+
 ### `World` (`src/Narrative/World.cs`) — autoload
-Facade owning `Clock`, `State`, `Relationships`, and `Events`, re-broadcasting
+Facade owning `Clock`, `State`, `Relationships`, `Personality`, `Events`,
+`Dialogue` (library) and `DialogueRunner`, re-broadcasting
 their changes as Godot signals (`TimeAdvanced`, `DayElapsed`, `FlagChanged`,
 `ValueChanged`, `EventActivated`, `EventResolved`, `EventExpired`,
-`RelationshipChanged`) and feeding every clock/state change into
-`Events.Evaluate()`. `NewGame()` resets, registers content, and seeds opening
-conditions (including the Arlen↔Lysandra bond). Reached via `World.Instance`.
+`RelationshipChanged`, `PersonalityChanged`) and feeding every clock/state change
+into `Events.Evaluate()`. `NewGame()` resets, registers content (events +
+dialogue), and seeds opening conditions (including the Arlen↔Lysandra bond).
+Reached via `World.Instance`.
 
 ## Autoload registration
 
@@ -147,7 +171,8 @@ multi-value relationship model that most of these serve.
    data-driven rules over WorldState + WorldClock; the living world and chains.
 4. ~~**RelationshipModel**~~ — **implemented** (`src/Narrative/Relationships/`):
    Trust / Understanding / Attraction / Resentment / Dependence, independent.
-5. **Dialogue** — data-driven conversation graph applying effects to state.
+5. ~~**Dialogue**~~ — **implemented** (`src/Narrative/Dialogue/`, plus the
+   `Personality` model): data-driven graph applying effects to state.
 6. **GameMode layer** — Cinematic / Exploration / Interactive-Cinematic /
    Decision, including timed choices; extends `GameManager`.
 7. **Save/Load** — serialise WorldState + WorldClock + RelationshipModel +
