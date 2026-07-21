@@ -1,3 +1,5 @@
+using Lumenfall.Narrative.Relationships;
+
 namespace Lumenfall.Narrative.Events;
 
 /// <summary>
@@ -21,10 +23,14 @@ public sealed class ConsequenceContext
     /// <summary>The event system itself, so effects can unlock/schedule further events.</summary>
     public EventManager Events { get; }
 
-    public ConsequenceContext(WorldClock clock, WorldState state, EventManager events)
+    /// <summary>Character relationships — outcomes can shift Trust, Resentment, etc.</summary>
+    public RelationshipModel Relationships { get; }
+
+    public ConsequenceContext(WorldClock clock, WorldState state, EventManager events, RelationshipModel relationships)
     {
         Clock = clock;
         State = state;
         Events = events;
+        Relationships = relationships;
     }
 }

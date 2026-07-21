@@ -1,6 +1,7 @@
 using Godot;
 using Lumenfall.Narrative.Events;
 using Lumenfall.Narrative.Events.Content;
+using Lumenfall.Narrative.Relationships;
 
 namespace Lumenfall.Narrative;
 
@@ -28,13 +29,16 @@ public partial class World : Node
     /// <summary>The authoritative fact store (flags + values).</summary>
     public WorldState State { get; } = new();
 
+    /// <summary>Character relationships (Trust/Understanding/Attraction/Resentment/Dependence).</summary>
+    public RelationshipModel Relationships { get; } = new();
+
     /// <summary>The living-world engine: events that activate, expire, and chain.</summary>
     public EventManager Events { get; }
 
     public World()
     {
-        // Events read and mutate the same clock and state.
-        Events = new EventManager(Clock, State);
+        // Events read and mutate the same clock, state, and relationships.
+        Events = new EventManager(Clock, State, Relationships);
     }
 
     /// <summary>Mirror of <see cref="WorldClock.Advanced"/>. Arg: minutes added.</summary>
@@ -65,6 +69,10 @@ public partial class World : Node
     [Signal]
     public delegate void EventExpiredEventHandler(string id);
 
+    /// <summary>A relationship axis changed. Args: character A, character B, axis name.</summary>
+    [Signal]
+    public delegate void RelationshipChangedEventHandler(string characterA, string characterB, string axis);
+
     public override void _EnterTree()
     {
         if (Instance is not null && Instance != this)
@@ -85,6 +93,9 @@ public partial class World : Node
         Events.EventResolved += (evt, outcomeId) => EmitSignal(SignalName.EventResolved, evt.Id, outcomeId);
         Events.EventExpired += evt => EmitSignal(SignalName.EventExpired, evt.Id);
 
+        // Re-broadcast relationship changes.
+        Relationships.Changed += (a, b, axis) => EmitSignal(SignalName.RelationshipChanged, a, b, axis.ToString());
+
         // The world reacts to time and facts: any change re-evaluates events.
         // (EventManager guards against re-entrancy when effects change state.)
         Clock.Advanced += _ => Events.Evaluate();
@@ -102,6 +113,7 @@ public partial class World : Node
         Clock.Restore(new WorldClockData(0));
         State.Reset();
         Events.Reset();
+        Relationships.Reset();
 
         // Register authored event content. (Later this can be data-driven.)
         CinderHollowEvents.RegisterInto(Events);
@@ -111,6 +123,14 @@ public partial class World : Node
         State.SetValue(WorldFacts.Values.ContinuanceInfluence, 0);
         State.SetFlag(WorldFacts.Flags.ElderAlive, true);
         State.SetFlag(WorldFacts.Flags.CinderHospitalOpen, true);
+
+        // Arlen and Lysandra begin at Phase 1 — Distrust (Character Bible):
+        // no romance yet, little trust or understanding, some early resentment.
+        Relationships.Set(Characters.Arlen, Characters.Lysandra, RelationshipAxis.Trust, 10);
+        Relationships.Set(Characters.Arlen, Characters.Lysandra, RelationshipAxis.Understanding, 5);
+        Relationships.Set(Characters.Arlen, Characters.Lysandra, RelationshipAxis.Attraction, 0);
+        Relationships.Set(Characters.Arlen, Characters.Lysandra, RelationshipAxis.Resentment, 25);
+        Relationships.Set(Characters.Arlen, Characters.Lysandra, RelationshipAxis.Dependence, 0);
 
         Events.Evaluate();
         GD.Print($"[World] New game. {Clock.ToDisplayString()}");

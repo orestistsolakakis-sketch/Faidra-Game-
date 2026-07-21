@@ -101,12 +101,24 @@ Evaluation loops until the world settles, so one choice ripples fully in a tick.
 Runtime state (status + activation time) serializes; definitions re-register on
 load. Authored content lives in `Events/Content/` (e.g. `CinderHollowEvents`).
 
+### Relationships (`src/Narrative/Relationships/`)
+The five-value model (Trust / Understanding / Attraction / Resentment /
+Dependence), tracked independently so love can coexist with distrust and
+resentment (docs/SYSTEMS_BIBLE.md). A **`Relationship`** holds one pair's clamped
+0–100 axes; **`RelationshipModel`** owns all pairs keyed order-independently
+(Arlen↔Lysandra == Lysandra↔Arlen), creating pairs lazily and raising `Changed`.
+Character ids come from the **`Characters`** registry. Exposed on
+`ConsequenceContext`, so event outcomes (and later dialogue choices) read and
+move relationship values. Pure C#, serializable; seeded at new-game to Phase 1
+"Distrust". Beats gate on *combinations* of axes, checked in content conditions.
+
 ### `World` (`src/Narrative/World.cs`) — autoload
-Facade owning `Clock`, `State`, and `Events`, re-broadcasting their changes as
-Godot signals (`TimeAdvanced`, `DayElapsed`, `FlagChanged`, `ValueChanged`,
-`EventActivated`, `EventResolved`, `EventExpired`) and feeding every clock/state
-change into `Events.Evaluate()`. `NewGame()` resets, registers content, and seeds
-opening conditions. Reached via `World.Instance`.
+Facade owning `Clock`, `State`, `Relationships`, and `Events`, re-broadcasting
+their changes as Godot signals (`TimeAdvanced`, `DayElapsed`, `FlagChanged`,
+`ValueChanged`, `EventActivated`, `EventResolved`, `EventExpired`,
+`RelationshipChanged`) and feeding every clock/state change into
+`Events.Evaluate()`. `NewGame()` resets, registers content, and seeds opening
+conditions (including the Arlen↔Lysandra bond). Reached via `World.Instance`.
 
 ## Autoload registration
 
@@ -133,8 +145,8 @@ multi-value relationship model that most of these serve.
 2. **WorldState** — authoritative serializable store of facts/flags.
 3. ~~**Consequence/Event system**~~ — **implemented** (`src/Narrative/Events/`):
    data-driven rules over WorldState + WorldClock; the living world and chains.
-4. **RelationshipModel** — Trust / Understanding / Attraction / Resentment /
-   Dependence as independent values.
+4. ~~**RelationshipModel**~~ — **implemented** (`src/Narrative/Relationships/`):
+   Trust / Understanding / Attraction / Resentment / Dependence, independent.
 5. **Dialogue** — data-driven conversation graph applying effects to state.
 6. **GameMode layer** — Cinematic / Exploration / Interactive-Cinematic /
    Decision, including timed choices; extends `GameManager`.

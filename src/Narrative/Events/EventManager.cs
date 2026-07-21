@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Lumenfall.Narrative.Relationships;
 
 namespace Lumenfall.Narrative.Events;
 
@@ -42,9 +43,9 @@ public sealed class EventManager
     /// <summary>Raised when an event's deadline passes unresolved.</summary>
     public event Action<WorldEvent>? EventExpired;
 
-    public EventManager(WorldClock clock, WorldState state)
+    public EventManager(WorldClock clock, WorldState state, RelationshipModel relationships)
     {
-        _context = new ConsequenceContext(clock, state, this);
+        _context = new ConsequenceContext(clock, state, this, relationships);
     }
 
     /// <summary>Register an event definition. Starts Dormant unless already tracked.</summary>

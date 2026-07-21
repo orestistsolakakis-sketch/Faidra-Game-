@@ -3,6 +3,7 @@ using Lumenfall.Core;
 using Lumenfall.Narrative;
 using Lumenfall.Narrative.Events;
 using Lumenfall.Narrative.Events.Content;
+using Lumenfall.Narrative.Relationships;
 
 namespace Lumenfall.World;
 
@@ -42,6 +43,7 @@ public partial class PlaceholderArea : Node3D
         world.EventActivated += OnEventActivated;
         world.EventExpired += OnEventExpired;
         world.EventResolved += OnEventResolved;
+        world.RelationshipChanged += OnRelationshipChanged;
 
         UpdateHint(GameManager.Instance.State);
         RefreshReadout();
@@ -61,6 +63,7 @@ public partial class PlaceholderArea : Node3D
             world.EventActivated -= OnEventActivated;
             world.EventExpired -= OnEventExpired;
             world.EventResolved -= OnEventResolved;
+            world.RelationshipChanged -= OnRelationshipChanged;
         }
     }
 
@@ -69,6 +72,7 @@ public partial class PlaceholderArea : Node3D
     private void OnEventActivated(string id) => GD.Print($"[Event] ACTIVATED: {id}");
     private void OnEventExpired(string id) => GD.Print($"[Event] EXPIRED (default outcome): {id}");
     private void OnEventResolved(string id, string outcomeId) => GD.Print($"[Event] RESOLVED: {id} → {outcomeId}");
+    private void OnRelationshipChanged(string a, string b, string axis) => RefreshReadout();
 
     public override void _UnhandledInput(InputEvent @event)
     {
@@ -102,6 +106,13 @@ public partial class PlaceholderArea : Node3D
                 World.Instance.State.SetValue(WorldFacts.Values.LeftCinderDay, World.Instance.Clock.Day);
                 World.Instance.State.SetFlag(WorldFacts.Flags.LeftCinderHollow, true);
                 break;
+            case Key.Key3: // a warm moment: Arlen trusts Lysandra a little more
+                World.Instance.Relationships.Adjust(Characters.Arlen, Characters.Lysandra, RelationshipAxis.Trust, 8);
+                World.Instance.Relationships.Adjust(Characters.Arlen, Characters.Lysandra, RelationshipAxis.Attraction, 5);
+                break;
+            case Key.Key4: // a hurt: resentment grows
+                World.Instance.Relationships.Adjust(Characters.Arlen, Characters.Lysandra, RelationshipAxis.Resentment, 10);
+                break;
         }
     }
 
@@ -112,8 +123,8 @@ public partial class PlaceholderArea : Node3D
         _hint.Text = state == GameState.Paused
             ? "PAUSED\n[Esc] resume   [Backspace] main menu"
             : "Placeholder Area\n[Esc] pause   [Backspace] menu\n\n" +
-              "SIM DEMO:  [T] +1 day   [G] generator fails   " +
-              "[1] repair   [2] ignore   [L] leave district";
+              "SIM DEMO:  [T] +1 day   [G] generator fails   [1] repair   [2] ignore\n" +
+              "           [L] leave district   [3] warm moment   [4] a hurt";
     }
 
     private void RefreshReadout()
@@ -125,6 +136,8 @@ public partial class PlaceholderArea : Node3D
         if (active == "")
             active = "\n  (none)";
 
+        Relationship al = w.Relationships.Between(Characters.Arlen, Characters.Lysandra);
+
         _readout.Text =
             $"World Time: {w.Clock.ToDisplayString()}\n" +
             $"Engine stability: {w.State.GetValue(WorldFacts.Values.HeartEngineStability)}\n" +
@@ -133,7 +146,13 @@ public partial class PlaceholderArea : Node3D
             $"Hospital open: {w.State.GetFlag(WorldFacts.Flags.CinderHospitalOpen)}\n" +
             $"Doctor survived: {w.State.GetFlag(WorldFacts.Flags.CinderDoctorSurvived)}\n" +
             $"Arlen learned healing lore: {w.State.GetFlag(WorldFacts.Flags.ArlenLearnedHealingLore)}\n" +
-            $"Food shortage: {w.State.GetFlag(WorldFacts.Flags.CinderFoodShortage)}\n" +
+            $"Food shortage: {w.State.GetFlag(WorldFacts.Flags.CinderFoodShortage)}\n\n" +
+            $"Arlen ↔ Lysandra —  " +
+            $"Trust {al.Get(RelationshipAxis.Trust)}  " +
+            $"Underst {al.Get(RelationshipAxis.Understanding)}  " +
+            $"Attract {al.Get(RelationshipAxis.Attraction)}  " +
+            $"Resent {al.Get(RelationshipAxis.Resentment)}  " +
+            $"Depend {al.Get(RelationshipAxis.Dependence)}\n" +
             $"Active events:{active}";
     }
 }
