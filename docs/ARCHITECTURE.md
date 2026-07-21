@@ -88,10 +88,25 @@ change events that fire only on real changes. `Snapshot()/Restore()/Reset()`.
 Named constants for every fact key — compile-time safety against typos and the
 living index of tracked world state.
 
+### Event system (`src/Narrative/Events/`)
+The living world (see [`EVENT_SYSTEM_BIBLE.md`](EVENT_SYSTEM_BIBLE.md)). Also pure
+C#. A **`WorldEvent`** is a definition — a `Condition` over world data, an optional
+post-activation `DeadlineMinutes`, an `OnExpire` default outcome, and named player
+`Outcomes`. The **`EventManager`** re-evaluates all events on any clock/state
+change: dormant events whose condition is met **activate**; overdue actives
+**expire**; the player **resolves** an active event by choosing an outcome. Effects
+receive a **`ConsequenceContext`** (`Clock` + `State` + `Events`) so they can mutate
+the world *and* unlock further events — that is how consequence **chains** form.
+Evaluation loops until the world settles, so one choice ripples fully in a tick.
+Runtime state (status + activation time) serializes; definitions re-register on
+load. Authored content lives in `Events/Content/` (e.g. `CinderHollowEvents`).
+
 ### `World` (`src/Narrative/World.cs`) — autoload
-Facade owning `Clock` and `State`, re-broadcasting their changes as Godot signals
-(`TimeAdvanced`, `DayElapsed`, `FlagChanged`, `ValueChanged`). `NewGame()` resets
-and seeds opening conditions. Reached via `World.Instance`.
+Facade owning `Clock`, `State`, and `Events`, re-broadcasting their changes as
+Godot signals (`TimeAdvanced`, `DayElapsed`, `FlagChanged`, `ValueChanged`,
+`EventActivated`, `EventResolved`, `EventExpired`) and feeding every clock/state
+change into `Events.Evaluate()`. `NewGame()` resets, registers content, and seeds
+opening conditions. Reached via `World.Instance`.
 
 ## Autoload registration
 
@@ -116,8 +131,8 @@ multi-value relationship model that most of these serve.
 **Narrative simulation** (recommended build order, per the Systems Bible):
 1. **WorldClock** — the single advancing World Time value.
 2. **WorldState** — authoritative serializable store of facts/flags.
-3. **Consequence/Event system** — data-driven rules over WorldState + WorldClock
-   (the living world and consequence chains).
+3. ~~**Consequence/Event system**~~ — **implemented** (`src/Narrative/Events/`):
+   data-driven rules over WorldState + WorldClock; the living world and chains.
 4. **RelationshipModel** — Trust / Understanding / Attraction / Resentment /
    Dependence as independent values.
 5. **Dialogue** — data-driven conversation graph applying effects to state.

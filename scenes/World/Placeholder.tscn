@@ -21,11 +21,20 @@ unique_name_in_owner = true
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -400.0
-offset_top = 48.0
-offset_right = 400.0
-offset_bottom = 160.0
+offset_left = -500.0
+offset_top = 24.0
+offset_right = 500.0
+offset_bottom = 110.0
 grow_horizontal = 2
-theme_override_font_sizes/font_size = 28
+theme_override_font_sizes/font_size = 22
 text = "Placeholder Area"
 horizontal_alignment = 1
+
+[node name="Readout" type="Label" parent="Hud"]
+unique_name_in_owner = true
+offset_left = 32.0
+offset_top = 140.0
+offset_right = 640.0
+offset_bottom = 520.0
+theme_override_font_sizes/font_size = 20
+text = "World Time: —"

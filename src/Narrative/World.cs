@@ -1,4 +1,6 @@
 using Godot;
+using Lumenfall.Narrative.Events;
+using Lumenfall.Narrative.Events.Content;
 
 namespace Lumenfall.Narrative;
 
@@ -26,6 +28,15 @@ public partial class World : Node
     /// <summary>The authoritative fact store (flags + values).</summary>
     public WorldState State { get; } = new();
 
+    /// <summary>The living-world engine: events that activate, expire, and chain.</summary>
+    public EventManager Events { get; }
+
+    public World()
+    {
+        // Events read and mutate the same clock and state.
+        Events = new EventManager(Clock, State);
+    }
+
     /// <summary>Mirror of <see cref="WorldClock.Advanced"/>. Arg: minutes added.</summary>
     [Signal]
     public delegate void TimeAdvancedEventHandler(long minutes);
@@ -42,6 +53,18 @@ public partial class World : Node
     [Signal]
     public delegate void ValueChangedEventHandler(string key);
 
+    /// <summary>An event became live. Arg: event id.</summary>
+    [Signal]
+    public delegate void EventActivatedEventHandler(string id);
+
+    /// <summary>The player resolved an event. Args: event id, chosen outcome id.</summary>
+    [Signal]
+    public delegate void EventResolvedEventHandler(string id, string outcomeId);
+
+    /// <summary>An event's deadline passed unresolved. Arg: event id.</summary>
+    [Signal]
+    public delegate void EventExpiredEventHandler(string id);
+
     public override void _EnterTree()
     {
         if (Instance is not null && Instance != this)
@@ -56,6 +79,17 @@ public partial class World : Node
         Clock.DayElapsed += day => EmitSignal(SignalName.DayElapsed, day);
         State.FlagChanged += key => EmitSignal(SignalName.FlagChanged, key);
         State.ValueChanged += key => EmitSignal(SignalName.ValueChanged, key);
+
+        // Re-broadcast the living-world engine's activity.
+        Events.EventActivated += evt => EmitSignal(SignalName.EventActivated, evt.Id);
+        Events.EventResolved += (evt, outcomeId) => EmitSignal(SignalName.EventResolved, evt.Id, outcomeId);
+        Events.EventExpired += evt => EmitSignal(SignalName.EventExpired, evt.Id);
+
+        // The world reacts to time and facts: any change re-evaluates events.
+        // (EventManager guards against re-entrancy when effects change state.)
+        Clock.Advanced += _ => Events.Evaluate();
+        State.FlagChanged += _ => Events.Evaluate();
+        State.ValueChanged += _ => Events.Evaluate();
     }
 
     /// <summary>
@@ -67,12 +101,18 @@ public partial class World : Node
     {
         Clock.Restore(new WorldClockData(0));
         State.Reset();
+        Events.Reset();
+
+        // Register authored event content. (Later this can be data-driven.)
+        CinderHollowEvents.RegisterInto(Events);
 
         // Seed opening world conditions.
         State.SetValue(WorldFacts.Values.HeartEngineStability, 100);
         State.SetValue(WorldFacts.Values.ContinuanceInfluence, 0);
         State.SetFlag(WorldFacts.Flags.ElderAlive, true);
+        State.SetFlag(WorldFacts.Flags.CinderHospitalOpen, true);
 
+        Events.Evaluate();
         GD.Print($"[World] New game. {Clock.ToDisplayString()}");
     }
 }

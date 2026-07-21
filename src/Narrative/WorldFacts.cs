@@ -43,11 +43,40 @@ public static class WorldFacts
 
         /// <summary>The lift connecting Gearmarket and Cinder Hollow is repaired.</summary>
         public const string GearmarketLiftRepaired = "lift_gearmarket_repaired";
+
+        // --- Event-system demonstration facts (Cinder Hollow living world) ---
+
+        /// <summary>Cinder Hollow's main power generator has failed.</summary>
+        public const string CinderGeneratorFailed = "cinder_generator_failed";
+
+        /// <summary>Cinder Hollow's power has been restored (generator repaired/replaced).</summary>
+        public const string CinderPowerRestored = "cinder_power_restored";
+
+        /// <summary>The Cinder Hollow hospital is still open and operating.</summary>
+        public const string CinderHospitalOpen = "cinder_hospital_open";
+
+        /// <summary>The hospital doctor survived (depends on the hospital staying open).</summary>
+        public const string CinderDoctorSurvived = "cinder_doctor_survived";
+
+        /// <summary>The doctor taught Arlen about the nature of healing (a chain payoff).</summary>
+        public const string ArlenLearnedHealingLore = "arlen_learned_healing_lore";
+
+        /// <summary>Cinder Hollow's food supply has been restored.</summary>
+        public const string CinderFoodRestored = "cinder_food_restored";
+
+        /// <summary>The party has departed Cinder Hollow (arms delayed away-from-home events).</summary>
+        public const string LeftCinderHollow = "left_cinder_hollow";
+
+        /// <summary>A food shortage has taken hold in Cinder Hollow.</summary>
+        public const string CinderFoodShortage = "cinder_food_shortage";
     }
 
     /// <summary>Integer facts: "how much / how many?".</summary>
     public static class Values
     {
+        /// <summary>The World-Time day on which the party left Cinder Hollow (0 = not left).</summary>
+        public const string LeftCinderDay = "left_cinder_day";
+
         /// <summary>
         /// Heart Engine stability, 0–100. Degrades as World Time passes; the
         /// spine of the "hurry vs. help" tension. 100 = stable at game start.
