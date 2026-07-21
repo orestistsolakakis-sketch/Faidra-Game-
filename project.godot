@@ -1,6 +1,6 @@
-; Engine configuration file for Lumenfall (working title).
-; Godot 4.x project. Kept intentionally minimal and hand-editable so it
-; produces clean, reviewable git diffs. See docs/ARCHITECTURE.md.
+; Engine configuration file for The Heart Engine (working codename "Lumenfall").
+; Godot 4.x, GDScript. GDScript (not C#) is used so the project can export to the
+; web/browser. See docs/ARCHITECTURE.md.
 
 config_version=5
 
@@ -9,12 +9,8 @@ config_version=5
 config/name="Lumenfall (Working Title)"
 config/description="A 3D story-driven adventure of ancient magic and forgotten technology."
 run/main_scene="res://scenes/Boot/Main.tscn"
-config/features=PackedStringArray("4.3", "C#", "Forward Plus")
+config/features=PackedStringArray("4.3", "Forward Plus")
 config/icon="res://icon.svg"
-
-[dotnet]
-
-project/assembly_name="Lumenfall"
 
 ; Autoloads are global singletons available from any script.
 ; GameManager     -> owns high-level game state (the spine of the game).
@@ -25,10 +21,10 @@ project/assembly_name="Lumenfall"
 ; depends on GameManager existing first).
 [autoload]
 
-GameManager="*res://src/Core/GameManager.cs"
-GameModeManager="*res://src/Core/GameModeManager.cs"
-SceneLoader="*res://src/Core/SceneLoader.cs"
-World="*res://src/Narrative/World.cs"
+GameManager="*res://src/core/game_manager.gd"
+GameModeManager="*res://src/core/game_mode_manager.gd"
+SceneLoader="*res://src/core/scene_loader.gd"
+World="*res://src/narrative/world.gd"
 
 [display]
 

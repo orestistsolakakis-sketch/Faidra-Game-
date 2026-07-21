@@ -1,8 +1,8 @@
 [gd_scene load_steps=12 format=3 uid="uid://blumenfallsandbox01"]
 
-[ext_resource type="Script" path="res://src/World/PlaceholderArea.cs" id="1_root"]
-[ext_resource type="Script" path="res://src/Player/PlayerCharacter.cs" id="2_char"]
-[ext_resource type="Script" path="res://src/Player/PartyController.cs" id="3_party"]
+[ext_resource type="Script" path="res://src/world/sandbox_root.gd" id="1_root"]
+[ext_resource type="Script" path="res://src/player/player_character.gd" id="2_char"]
+[ext_resource type="Script" path="res://src/player/party_controller.gd" id="3_party"]
 
 [sub_resource type="BoxShape3D" id="FloorShape"]
 size = Vector3(60, 1, 60)
@@ -47,7 +47,7 @@ shape = SubResource("FloorShape")
 [node name="Arlen" type="CharacterBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 1, 0)
 script = ExtResource("2_char")
-CharacterId = "arlen"
+character_id = "arlen"
 
 [node name="Collision" type="CollisionShape3D" parent="Arlen"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
@@ -61,7 +61,7 @@ surface_material_override/0 = SubResource("ArlenMat")
 [node name="Lysandra" type="CharacterBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 1, 0)
 script = ExtResource("2_char")
-CharacterId = "lysandra"
+character_id = "lysandra"
 
 [node name="Collision" type="CollisionShape3D" parent="Lysandra"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
@@ -84,8 +84,8 @@ current = true
 [node name="PartyController" type="Node3D" parent="."]
 process_mode = 3
 script = ExtResource("3_party")
-CharacterPaths = Array[NodePath]([NodePath("../Arlen"), NodePath("../Lysandra")])
-CameraPivotPath = NodePath("../CameraPivot")
+character_paths = Array[NodePath]([NodePath("../Arlen"), NodePath("../Lysandra")])
+camera_pivot_path = NodePath("../CameraPivot")
 
 [node name="Hud" type="CanvasLayer" parent="."]
 

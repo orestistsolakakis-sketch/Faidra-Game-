@@ -18,22 +18,25 @@ relationships and endings. An original world; no borrowed characters or content.
 ## Tech
 
 - **Engine:** Godot 4.3+
-- **Language:** C# (`net8.0`) — chosen for a large, multi-system codebase
+- **Language:** **GDScript** — so the game can export to the **web/browser**
+  (Godot cannot web-export C# projects). The systems were originally prototyped in
+  C# and ported; the architecture is identical.
 - **Renderer:** Forward+
 
 ## Getting started
 
-1. Install the **.NET (C#) build** of Godot 4.3 or newer, plus the .NET 8 SDK.
+1. Install **Godot 4.3 or newer** (the standard build — *not* the .NET/C# build;
+   no .NET SDK needed).
 2. Open `project.godot` in the Godot editor.
-3. Let it build the C# solution (`Lumenfall.sln`) on first open.
-4. Press **Play** (F5). You should see the title screen → **Play** drops you into
-   a placeholder area; **Esc** pauses, **Backspace** returns to the menu.
+3. Press **Play** (F5). You should see the title screen → **Play** drops you into
+   the sandbox; **WASD** + mouse to move, **Q** to switch character, **Esc**
+   pauses, **Backspace** returns to the menu. (See the on-screen key list.)
 
 ## Layout
 
 ```
-src/     C# source by domain (Core, UI, World, …)
-scenes/  Godot scenes mirroring src/
+src/     GDScript source by domain (core, narrative, player, ui, world)
+scenes/  Godot scenes
 assets/  Art, audio, fonts, shaders
 docs/    Design & architecture docs
 ```

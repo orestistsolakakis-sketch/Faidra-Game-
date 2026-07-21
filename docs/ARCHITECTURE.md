@@ -1,9 +1,20 @@
 # Lumenfall — Architecture
 
-*Working title. Engine: **Godot 4** · Language: **C#** (`net8.0`).*
+*Working title. Engine: **Godot 4** · Language: **GDScript**.*
 
 This document is the map of the codebase. It is kept in step with the code as
 systems are added. If you read one file before touching the project, read this.
+
+> **Note on language:** the codebase is **GDScript** (files are snake_case `.gd`
+> under lowercase `src/` folders, e.g. `src/narrative/world_clock.gd`). It was
+> originally prototyped in C# and ported to GDScript so the game can **export to
+> the web** — Godot cannot web-export C# projects. The **architecture is
+> unchanged**; where this document still says "C#", `[Signal]`, `.cs`, or a
+> `PascalName`, read the equivalent GDScript (`signal`, `.gd`, `snake_name`).
+> Autoload singletons are reached by their global name (`GameManager`,
+> `GameModeManager`, `SceneLoader`, `World`) rather than a static `Instance`, and
+> the pure-logic classes are `RefCounted` types that emit their own signals
+> directly (no C#-style re-broadcast layer).
 
 ## Guiding principles
 
