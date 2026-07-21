@@ -1,0 +1,196 @@
+extends Node3D
+## Greybox of the Level 01 opening district (docs/levels/01_CINDER_HOLLOW.md):
+## a lamplit street running from Arlen's workshop (behind spawn) down to the dead
+## freight lift (ahead), lined with buildings, market stalls, Lifeline glow and
+## static NPC blockouts for life. Placeholder geometry carrying the composition,
+## palette and lighting until real assets exist (docs/ART_DIRECTION.md).
+
+const Blockout := preload("res://src/player/character_blockout.gd")
+
+const WARM := Color(1.0, 0.72, 0.38)
+const FORGE := Color(1.0, 0.5, 0.2)
+const TEAL := Color(0.31, 0.84, 0.76)
+const MAGENTA := Color(1.0, 0.36, 0.48)
+const STONE := Color(0.14, 0.16, 0.20)
+const BRICK := Color(0.22, 0.16, 0.13)
+const COPPER := Color(0.45, 0.32, 0.22)
+
+var _rng := RandomNumberGenerator.new()
+
+
+func _ready() -> void:
+	_rng.seed = 71
+	_setup_environment()
+	_build_district()
+
+
+func _setup_environment() -> void:
+	var env := Environment.new()
+	env.background_mode = Environment.BG_COLOR
+	env.background_color = Color(0.03, 0.04, 0.06)
+	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+	env.ambient_light_color = Color(0.15, 0.19, 0.25)
+	env.ambient_light_energy = 0.45
+	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
+	env.tonemap_white = 6.0
+	env.fog_enabled = true
+	env.fog_light_color = Color(0.10, 0.15, 0.20)
+	env.fog_density = 0.02
+	env.fog_sky_affect = 0.0
+	env.glow_enabled = true
+	env.glow_intensity = 0.9
+	env.glow_bloom = 0.15
+	env.glow_strength = 1.1
+	var we := WorldEnvironment.new()
+	we.environment = env
+	add_child(we)
+
+
+func _build_district() -> void:
+	# Ground street (dark wet stone).
+	_box(Vector3(16, 0.4, 60), Vector3(0, -0.2, -3), _mat(Color(0.09, 0.10, 0.13)))
+
+	# Buildings down both sides.
+	for i in range(-4, 5):
+		var z := i * 6.0
+		_building(Vector3(-9.5, 0, z))
+		_building(Vector3(9.5, 0, z))
+
+	# Arlen's workshop (behind spawn, +Z) — a warm forge glow marks home.
+	_workshop(Vector3(0, 0, 16))
+
+	# The dead freight lift (ahead, -Z) — the objective, lit cold and failing.
+	_lift(Vector3(0, 0, -24))
+
+	# Warm lamp posts down the street.
+	for i in range(-3, 4):
+		_lamp(Vector3(-3.6, 0, i * 6.0))
+		_lamp(Vector3(3.6, 0, i * 6.0))
+
+	# Lifelines: healthy teal near home, turning unstable magenta toward the lift.
+	for i in range(-16, 12):
+		var z := i * 1.5
+		var color := TEAL if z > -12 else MAGENTA
+		_lifeline(Vector3(0, 0.03, z), color)
+
+	# Market stalls mid-street.
+	_stall(Vector3(-4.5, 0, 2))
+	_stall(Vector3(4.5, 0, -4))
+	_stall(Vector3(-4.5, 0, -10))
+
+	# Static NPCs — the district's people.
+	var npc_colors := [Color(0.3, 0.26, 0.22), Color(0.26, 0.28, 0.3), Color(0.34, 0.3, 0.26), Color(0.24, 0.24, 0.28)]
+	var npc_spots := [
+		Vector3(-3, 0, 3), Vector3(3.2, 0, -3), Vector3(-2.5, 0, -9),
+		Vector3(2.8, 0, 6), Vector3(-3.4, 0, -14), Vector3(1.5, 0, 12),
+	]
+	for i in npc_spots.size():
+		_npc(npc_spots[i], npc_colors[i % npc_colors.size()])
+
+	# Bram — Arlen's friend — stands near his interaction spot, in a warmer coat.
+	_npc(Vector3(2.2, 0, 4.2), Color(0.5, 0.34, 0.2))
+
+
+func _building(base: Vector3) -> void:
+	var height := _rng.randf_range(5.0, 10.0)
+	var depth := _rng.randf_range(4.0, 6.0)
+	_box(Vector3(5.5, height, depth), base + Vector3(0, height * 0.5, 0), _mat(BRICK.lerp(STONE, _rng.randf())))
+	for _w in _rng.randi_range(2, 5):
+		var side := 1.0 if _rng.randf() > 0.5 else -1.0
+		var wy := _rng.randf_range(1.5, height - 1.0)
+		var wz := _rng.randf_range(-depth * 0.4, depth * 0.4)
+		_box(Vector3(0.1, 0.5, 0.5), base + Vector3(side * 2.76, wy, wz), _emissive(WARM, 2.2))
+
+
+func _workshop(pos: Vector3) -> void:
+	_box(Vector3(7, 6, 5), pos + Vector3(0, 3, 0), _mat(Color(0.24, 0.18, 0.15)))
+	# Open doorway framing a forge.
+	_box(Vector3(2.4, 3, 0.3), pos + Vector3(0, 1.5, -2.6), _mat(Color(0.05, 0.05, 0.06)))
+	_box(Vector3(1.2, 1.0, 1.0), pos + Vector3(0, 0.6, -3.4), _emissive(FORGE, 2.6))
+	var glow := OmniLight3D.new()
+	glow.light_color = FORGE
+	glow.light_energy = 2.6
+	glow.omni_range = 8.0
+	glow.position = pos + Vector3(0, 1.4, -3.2)
+	add_child(glow)
+
+
+func _lift(pos: Vector3) -> void:
+	# A tall frame + platform, dark and dead, with a failing cold panel.
+	for x in [-2.2, 2.2]:
+		_box(Vector3(0.4, 7, 0.4), pos + Vector3(x, 3.5, -2.2), _mat(STONE))
+		_box(Vector3(0.4, 7, 0.4), pos + Vector3(x, 3.5, 2.2), _mat(STONE))
+	_box(Vector3(5, 0.4, 5), pos + Vector3(0, 0.2, 0), _mat(Color(0.1, 0.11, 0.13)))
+	_box(Vector3(4, 3, 0.3), pos + Vector3(0, 2, -2.4), _mat(Color(0.12, 0.12, 0.14)))
+	_box(Vector3(1.2, 0.5, 0.2), pos + Vector3(0, 2, -2.55), _emissive(MAGENTA, 2.0))
+	var light := OmniLight3D.new()
+	light.light_color = MAGENTA
+	light.light_energy = 1.6
+	light.omni_range = 9.0
+	light.position = pos + Vector3(0, 2.5, 0)
+	add_child(light)
+
+
+func _stall(pos: Vector3) -> void:
+	for x in [-0.9, 0.9]:
+		_box(Vector3(0.1, 2, 0.1), pos + Vector3(x, 1, 0), _mat(COPPER))
+	_box(Vector3(2.2, 0.1, 1.4), pos + Vector3(0, 2, 0), _mat(Color(0.35, 0.15, 0.15)))  # awning
+	_box(Vector3(2.0, 0.8, 1.0), pos + Vector3(0, 0.9, 0), _mat(Color(0.2, 0.16, 0.12)))  # counter
+
+
+func _lamp(pos: Vector3) -> void:
+	_box(Vector3(0.12, 3.0, 0.12), pos + Vector3(0, 1.5, 0), _mat(STONE))
+	var bulb := SphereMesh.new()
+	bulb.radius = 0.15
+	bulb.height = 0.3
+	_add(bulb, pos + Vector3(0, 3.0, 0), _emissive(WARM, 3.0))
+	var light := OmniLight3D.new()
+	light.light_color = WARM
+	light.light_energy = 2.0
+	light.omni_range = 8.0
+	light.position = pos + Vector3(0, 3.0, 0)
+	add_child(light)
+
+
+func _lifeline(pos: Vector3, color: Color) -> void:
+	_box(Vector3(0.26, 0.05, 1.2), pos, _emissive(color, 2.0))
+
+
+func _npc(pos: Vector3, coat: Color) -> void:
+	var n := Blockout.new()
+	n.body_color = coat
+	n.accent_color = Color(0.12, 0.12, 0.14)
+	n.skin_color = Color(0.7, 0.55, 0.45)
+	n.position = pos
+	n.rotation.y = _rng.randf_range(-PI, PI)
+	add_child(n)
+
+
+func _box(size: Vector3, pos: Vector3, mat: StandardMaterial3D) -> void:
+	var mesh := BoxMesh.new()
+	mesh.size = size
+	_add(mesh, pos, mat)
+
+
+func _add(mesh: Mesh, pos: Vector3, mat: StandardMaterial3D) -> void:
+	var mi := MeshInstance3D.new()
+	mi.mesh = mesh
+	mi.material_override = mat
+	mi.position = pos
+	add_child(mi)
+
+
+func _mat(c: Color) -> StandardMaterial3D:
+	var m := StandardMaterial3D.new()
+	m.albedo_color = c
+	m.roughness = 0.9
+	return m
+
+
+func _emissive(c: Color, energy: float) -> StandardMaterial3D:
+	var m := StandardMaterial3D.new()
+	m.albedo_color = c
+	m.emission_enabled = true
+	m.emission = c
+	m.emission_energy_multiplier = energy
+	return m

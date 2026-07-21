@@ -27,6 +27,11 @@ class Flags:
 	const LEFT_CINDER_HOLLOW := "left_cinder_hollow"
 	const CINDER_FOOD_SHORTAGE := "cinder_food_shortage"
 
+	# Level 01 opening (Cinder Hollow, Arlen solo)
+	const CINDER_WORKSHOP_DOOR_FIXED := "cinder_workshop_door_fixed"
+	const TALKED_TO_BRAM := "cinder_talked_to_bram"
+	const CINDER_LIFT_INSPECTED := "cinder_lift_inspected"
+
 	# Dialogue: knowledge & memory
 	const ARLEN_HID_INFO_FROM_LYSANDRA := "arlen_hid_info_from_lysandra"
 	const HAS_DISCOVERED_EWALD_AFFAIR := "has_discovered_ewald_affair"

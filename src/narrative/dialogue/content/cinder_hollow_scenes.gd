@@ -1,0 +1,75 @@
+class_name CinderHollowScenes
+## Opening dialogue for Level 01 (Cinder Hollow, Arlen solo). The intro exchange
+## with her best friend Bram (working name) — establishes voice, the district's
+## trouble (the sickness, the dead lift), and lets the player start shaping Arlen
+## (compassionate vs. cynical). See docs/levels/01_CINDER_HOLLOW.md.
+
+const BRAM_INTRO_ID := "CINDER_BRAM_INTRO"
+
+
+static func register_into(library: DialogueLibrary) -> void:
+	library.register(_build_bram_intro())
+
+
+static func _build_bram_intro() -> DialogueScene:
+	var scene := DialogueScene.new()
+	scene.id = BRAM_INTRO_ID
+	scene.location = "Cinder Hollow"
+	scene.participants = [Characters.ARLEN, Characters.ARLEN_BEST_FRIEND]
+	scene.start_node_id = "open"
+	scene.nodes = {
+		"open": _line(Characters.ARLEN_BEST_FRIEND,
+			"There she is. Half the Hollow's coughing up ash and you're fixing a door.", "why"),
+		"why": _why_node(),
+		"sickness": _line(Characters.ARLEN_BEST_FRIEND,
+			"Started three days back. Old Maren first, then the whole lower row. And the lift to the tunnels? Dead. No power up from below.", "care"),
+		"care": _care_node(),
+		"end_soft": _end_node("Then let's go make it your problem. Careful down there, Arlen."),
+		"end_hard": _end_node("...Right. Just parts and trouble. Same as always. Watch yourself."),
+	}
+	return scene
+
+
+static func _why_node() -> DialogueNode:
+	var n := DialogueNode.new()
+	n.id = "why"
+	n.speaker = Characters.ARLEN
+	n.text = "A door that won't open is a problem I can actually fix. What's wrong with everyone?"
+	n.choices = [
+		DialogueChoice.make("\"Tell me who's sick. I want to help.\"", "sickness", DialogueTone.HONEST,
+			func(ctx): ctx.personality.add(Characters.ARLEN, PersonalityTraits.Arlen.COMPASSIONATE)),
+		DialogueChoice.make("\"Not my circus. I hunt parts, not cures.\"", "sickness", DialogueTone.DEFENSIVE,
+			func(ctx): ctx.personality.add(Characters.ARLEN, PersonalityTraits.Arlen.CYNICAL)),
+	]
+	return n
+
+
+static func _care_node() -> DialogueNode:
+	var n := DialogueNode.new()
+	n.id = "care"
+	n.speaker = Characters.ARLEN
+	n.text = "A dead lift and a sickness that starts at the bottom of the district. That's not a coincidence."
+	n.choices = [
+		DialogueChoice.make("\"I'm going down there.\"", "end_soft", DialogueTone.HONEST,
+			func(ctx): ctx.personality.add(Characters.ARLEN, PersonalityTraits.Arlen.PROTECTIVE)),
+		DialogueChoice.make("\"If it pays, I'll look.\"", "end_hard", DialogueTone.SARCASTIC,
+			func(ctx): ctx.personality.add(Characters.ARLEN, PersonalityTraits.Arlen.INDEPENDENT)),
+	]
+	return n
+
+
+static func _end_node(text: String) -> DialogueNode:
+	var n := DialogueNode.new()
+	n.speaker = Characters.ARLEN_BEST_FRIEND
+	n.text = text
+	n.on_enter = func(ctx): ctx.state.set_flag(WorldFacts.Flags.TALKED_TO_BRAM, true)
+	n.next = ""
+	return n
+
+
+static func _line(speaker: String, text: String, next: String) -> DialogueNode:
+	var n := DialogueNode.new()
+	n.speaker = speaker
+	n.text = text
+	n.next = next
+	return n

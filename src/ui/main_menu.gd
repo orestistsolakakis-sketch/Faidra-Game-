@@ -12,7 +12,7 @@ func _ready() -> void:
 func _on_play_pressed() -> void:
 	# Boot the narrative simulation for a fresh run, then enter the world.
 	World.new_game()
-	SceneLoader.transition_to("res://scenes/World/PlayerSandbox.tscn", GameState.PLAYING)
+	SceneLoader.transition_to("res://scenes/World/CinderHollow.tscn", GameState.PLAYING)
 
 
 func _on_quit_pressed() -> void:

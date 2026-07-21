@@ -1,0 +1,114 @@
+[gd_scene load_steps=12 format=3 uid="uid://blumenfallcinder01"]
+
+[ext_resource type="Script" path="res://src/world/cinder_hollow_root.gd" id="1_root"]
+[ext_resource type="Script" path="res://src/player/player_character.gd" id="2_char"]
+[ext_resource type="Script" path="res://src/player/party_controller.gd" id="3_party"]
+[ext_resource type="Script" path="res://src/player/character_blockout.gd" id="4_block"]
+[ext_resource type="Script" path="res://src/world/cinder_hollow.gd" id="5_env"]
+[ext_resource type="Script" path="res://src/ui/game_hud.gd" id="6_hud"]
+[ext_resource type="Script" path="res://src/interaction/interactable.gd" id="7_inter"]
+
+[sub_resource type="BoxShape3D" id="FloorShape"]
+size = Vector3(40, 1, 90)
+
+[sub_resource type="CapsuleShape3D" id="CapShape"]
+radius = 0.4
+height = 1.8
+
+[sub_resource type="SphereShape3D" id="SphereBig"]
+radius = 3.0
+
+[sub_resource type="SphereShape3D" id="SphereSmall"]
+radius = 2.5
+
+[node name="CinderHollow" type="Node3D"]
+script = ExtResource("1_root")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.707, -0.5, 0.5, 0, 0.707, 0.707, -0.707, -0.5, 0.5, 0, 14, 0)
+light_color = Color(1, 0.88, 0.74, 1)
+light_energy = 0.4
+shadow_enabled = true
+
+[node name="District" type="Node3D" parent="."]
+script = ExtResource("5_env")
+
+[node name="Floor" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -3)
+
+[node name="Collision" type="CollisionShape3D" parent="Floor"]
+shape = SubResource("FloorShape")
+
+[node name="Arlen" type="CharacterBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 10)
+script = ExtResource("2_char")
+character_id = "arlen"
+
+[node name="Collision" type="CollisionShape3D" parent="Arlen"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("CapShape")
+
+[node name="Blockout" type="Node3D" parent="Arlen"]
+script = ExtResource("4_block")
+body_color = Color(0.85, 0.5, 0.32, 1)
+accent_color = Color(0.14, 0.15, 0.18, 1)
+skin_color = Color(0.86, 0.66, 0.52, 1)
+
+[node name="CameraPivot" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, 10)
+
+[node name="SpringArm3D" type="SpringArm3D" parent="CameraPivot"]
+spring_length = 5.5
+
+[node name="Camera3D" type="Camera3D" parent="CameraPivot/SpringArm3D"]
+current = true
+
+[node name="PartyController" type="Node3D" parent="."]
+process_mode = 3
+script = ExtResource("3_party")
+character_paths = Array[NodePath]([NodePath("../Arlen")])
+camera_pivot_path = NodePath("../CameraPivot")
+
+[node name="WorkshopDoor" type="Area3D" parent="." groups=["interactable"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 13)
+script = ExtResource("7_inter")
+id = "workshop_door"
+label = "Workshop Door"
+verb = "Repair"
+
+[node name="Shape" type="CollisionShape3D" parent="WorkshopDoor"]
+shape = SubResource("SphereSmall")
+
+[node name="Bram" type="Area3D" parent="." groups=["interactable"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.2, 1, 4.2)
+script = ExtResource("7_inter")
+id = "bram"
+label = "Bram"
+verb = "Talk"
+
+[node name="Shape" type="CollisionShape3D" parent="Bram"]
+shape = SubResource("SphereSmall")
+
+[node name="Neighbor" type="Area3D" parent="." groups=["interactable"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 1, -6)
+script = ExtResource("7_inter")
+id = "neighbor"
+label = "A Sick Neighbor's Door"
+verb = "Inspect"
+
+[node name="Shape" type="CollisionShape3D" parent="Neighbor"]
+shape = SubResource("SphereSmall")
+
+[node name="Lift" type="Area3D" parent="." groups=["interactable"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -21)
+script = ExtResource("7_inter")
+id = "lift"
+label = "Freight Lift"
+verb = "Inspect"
+
+[node name="Shape" type="CollisionShape3D" parent="Lift"]
+shape = SubResource("SphereBig")
+
+[node name="Hud" type="CanvasLayer" parent="."]
+unique_name_in_owner = true
+script = ExtResource("6_hud")

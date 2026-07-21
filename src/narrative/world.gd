@@ -92,3 +92,4 @@ func load_game(data: Dictionary) -> void:
 func _register_content() -> void:
 	CinderHollowEvents.register_into(events)
 	ArlenLysandraScenes.register_into(dialogue)
+	CinderHollowScenes.register_into(dialogue)

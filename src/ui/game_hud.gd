@@ -23,6 +23,7 @@ var _interact_label: Label
 var _toasts: VBoxContainer
 var _debug: Label
 
+var _root: Control
 var _dialogue: PanelContainer
 var _dlg_speaker: Label
 var _dlg_text: Label
@@ -54,6 +55,35 @@ func _ready() -> void:
 
 func set_active_character(id: String) -> void:
 	_party.text = "▸ %s   /   %s" % [_display(id), _other(id)]
+
+
+## Show a single lead's name (opening chapters, before the party forms).
+func set_solo_lead(name: String) -> void:
+	_party.text = name
+
+
+## A cinematic area/chapter title card that fades in and out.
+func show_title(title: String, subtitle: String) -> void:
+	var box := VBoxContainer.new()
+	box.alignment = BoxContainer.ALIGNMENT_CENTER
+	box.set_anchors_preset(Control.PRESET_CENTER)
+	box.position += Vector2(-260, -60)
+	box.custom_minimum_size = Vector2(520, 0)
+	var t := _make_label(title, 46, GOLD)
+	t.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	box.add_child(t)
+	if subtitle != "":
+		var s := _make_label(subtitle, 18, DIM)
+		s.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		box.add_child(s)
+	box.modulate.a = 0.0
+	_root.add_child(box)
+
+	var tween := create_tween()
+	tween.tween_property(box, "modulate:a", 1.0, 1.2)
+	tween.tween_interval(2.6)
+	tween.tween_property(box, "modulate:a", 0.0, 1.4)
+	tween.tween_callback(box.queue_free)
 
 
 func show_interaction(label: String, verb: String) -> void:
@@ -207,9 +237,11 @@ func _on_relationship_changed(a: String, b: String, axis: int, delta: int) -> vo
 
 func _build() -> void:
 	var root := Control.new()
+	root.name = "HudRoot"
 	root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(root)
+	_root = root
 
 	_reticle = _make_label("○", 16, Color(1, 1, 1, 0.55))
 	_reticle.set_anchors_preset(Control.PRESET_CENTER)
@@ -330,6 +362,7 @@ func _display(id: String) -> String:
 	match id:
 		"arlen": return "Arlen"
 		"lysandra": return "Lysandra"
+		"arlen_best_friend": return "Bram"
 		"": return ""
 		_: return id
 
