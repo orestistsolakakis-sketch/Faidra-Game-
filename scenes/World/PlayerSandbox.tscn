@@ -1,8 +1,10 @@
-[gd_scene load_steps=12 format=3 uid="uid://blumenfallsandbox01"]
+[gd_scene load_steps=10 format=3 uid="uid://blumenfallsandbox01"]
 
 [ext_resource type="Script" path="res://src/world/sandbox_root.gd" id="1_root"]
 [ext_resource type="Script" path="res://src/player/player_character.gd" id="2_char"]
 [ext_resource type="Script" path="res://src/player/party_controller.gd" id="3_party"]
+[ext_resource type="Script" path="res://src/player/character_blockout.gd" id="4_block"]
+[ext_resource type="Script" path="res://src/world/sandbox_environment.gd" id="5_env"]
 
 [sub_resource type="BoxShape3D" id="FloorShape"]
 size = Vector3(60, 1, 60)
@@ -11,28 +13,24 @@ size = Vector3(60, 1, 60)
 size = Vector3(60, 1, 60)
 
 [sub_resource type="StandardMaterial3D" id="FloorMat"]
-albedo_color = Color(0.14, 0.16, 0.2, 1)
+albedo_color = Color(0.1, 0.11, 0.14, 1)
+roughness = 0.9
 
 [sub_resource type="CapsuleShape3D" id="CapShape"]
 radius = 0.4
 height = 1.8
-
-[sub_resource type="CapsuleMesh" id="CapMesh"]
-radius = 0.4
-height = 1.8
-
-[sub_resource type="StandardMaterial3D" id="ArlenMat"]
-albedo_color = Color(0.85, 0.5, 0.32, 1)
-
-[sub_resource type="StandardMaterial3D" id="LysandraMat"]
-albedo_color = Color(0.42, 0.55, 0.85, 1)
 
 [node name="PlayerSandbox" type="Node3D"]
 script = ExtResource("1_root")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.707, -0.5, 0.5, 0, 0.707, 0.707, -0.707, -0.5, 0.5, 0, 12, 0)
+light_color = Color(1, 0.9, 0.78, 1)
+light_energy = 0.55
 shadow_enabled = true
+
+[node name="Environment" type="Node3D" parent="."]
+script = ExtResource("5_env")
 
 [node name="Floor" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
@@ -53,10 +51,11 @@ character_id = "arlen"
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
 shape = SubResource("CapShape")
 
-[node name="Mesh" type="MeshInstance3D" parent="Arlen"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
-mesh = SubResource("CapMesh")
-surface_material_override/0 = SubResource("ArlenMat")
+[node name="Blockout" type="Node3D" parent="Arlen"]
+script = ExtResource("4_block")
+body_color = Color(0.85, 0.5, 0.32, 1)
+accent_color = Color(0.14, 0.15, 0.18, 1)
+skin_color = Color(0.86, 0.66, 0.52, 1)
 
 [node name="Lysandra" type="CharacterBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 1, 0)
@@ -67,10 +66,11 @@ character_id = "lysandra"
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
 shape = SubResource("CapShape")
 
-[node name="Mesh" type="MeshInstance3D" parent="Lysandra"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
-mesh = SubResource("CapMesh")
-surface_material_override/0 = SubResource("LysandraMat")
+[node name="Blockout" type="Node3D" parent="Lysandra"]
+script = ExtResource("4_block")
+body_color = Color(0.42, 0.55, 0.85, 1)
+accent_color = Color(0.16, 0.17, 0.24, 1)
+skin_color = Color(0.9, 0.78, 0.72, 1)
 
 [node name="CameraPivot" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, 0)
