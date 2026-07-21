@@ -68,10 +68,35 @@ swap. All area/menu changes go through here.
 The main scene's script. A deliberate single entry point for future startup work
 (settings, save load, splash) before handing off to the menu.
 
+## Narrative core (implemented)
+
+The first two pieces of the simulation from [`SYSTEMS_BIBLE.md`](SYSTEMS_BIBLE.md).
+Both data classes are **pure C# (no Godot dependency)** — unit-testable and
+directly serializable — with a thin autoload facade bridging them to signals.
+
+### `WorldClock` (`src/Narrative/WorldClock.cs`)
+Owns **World Time** as a `long` count of minutes. `Advance()/AdvanceHours()/
+AdvanceDays()` push time forward; raises `Advanced` on any change and
+`DayElapsed` once per day boundary crossed (the daily "heartbeat" the future
+Consequence system will use). `Snapshot()/Restore()` for saves.
+
+### `WorldState` (`src/Narrative/WorldState.cs`)
+The authoritative **fact store**: boolean `flags` and integer `values`, with
+change events that fire only on real changes. `Snapshot()/Restore()/Reset()`.
+
+### `WorldFacts` (`src/Narrative/WorldFacts.cs`)
+Named constants for every fact key — compile-time safety against typos and the
+living index of tracked world state.
+
+### `World` (`src/Narrative/World.cs`) — autoload
+Facade owning `Clock` and `State`, re-broadcasting their changes as Godot signals
+(`TimeAdvanced`, `DayElapsed`, `FlagChanged`, `ValueChanged`). `NewGame()` resets
+and seeds opening conditions. Reached via `World.Instance`.
+
 ## Autoload registration
 
-Declared in `project.godot` under `[autoload]`, in dependency order:
-`GameManager` then `SceneLoader`.
+Declared in `project.godot` under `[autoload]`, constructed top-to-bottom:
+`GameManager`, `SceneLoader`, `World`.
 
 ## Roadmap (not yet built)
 
