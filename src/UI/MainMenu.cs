@@ -35,7 +35,7 @@ public partial class MainMenu : Control
         // Boot the narrative simulation for a fresh run, then enter the world.
         // (A save-slot flow will later choose between NewGame and loading.)
         World.Instance.NewGame();
-        SceneLoader.Instance.TransitionTo("res://scenes/World/Placeholder.tscn", GameState.Playing);
+        SceneLoader.Instance.TransitionTo("res://scenes/World/PlayerSandbox.tscn", GameState.Playing);
     }
 
     private void OnQuitPressed()

@@ -47,7 +47,7 @@ Main.tscn (Boot)
    └─ Boot.cs → SceneLoader.TransitionTo(MainMenu, MainMenu)
         └─ MainMenu.tscn: [Play] → SceneLoader.TransitionTo(Placeholder, Playing)
                           [Quit] → exit
-             └─ Placeholder.tscn: [Esc] pause/resume · [Backspace] → MainMenu
+             └─ PlayerSandbox.tscn: move (WASD) · [Q] switch · [Esc] pause · [Backspace] → MainMenu
 ```
 
 ### `GameState` (`src/Core/GameState.cs`)
@@ -73,6 +73,18 @@ swap. All area/menu changes go through here.
 ### `Boot` (`src/Core/Boot.cs`)
 The main scene's script. A deliberate single entry point for future startup work
 (settings, save load, splash) before handing off to the menu.
+
+## Player (implemented)
+
+`src/Player/`. **`PlayerCharacter`** (CharacterBody3D) does camera-relative
+third-person movement (walk/run/jump, smooth turn) in `_PhysicsProcess`, but only
+when it is active **and** `GameModeManager.AcceptsMovement` — so control freezes
+during dialogue/pauses with no knowledge of them. **`PartyController`** owns the
+spring-arm camera, follows the active lead, handles mouse-look, and switches
+control between Arlen and Lysandra (the dual-control canon). **`PlayerInput`**
+registers the input actions in code (physical keycodes). The playable scene is
+`scenes/World/PlayerSandbox.tscn`, whose root reuses the narrative harness script
+so movement and the whole simulation are demonstrable together.
 
 ## Narrative core (implemented)
 
@@ -171,9 +183,12 @@ of them; it defines World Time, the living world, consequence chains, and the
 multi-value relationship model that most of these serve.
 
 **Gameplay:**
-- **Player** — dual switchable control (Arlen / Lysandra), third-person
-  controller, camera, movement upgrades.
-- **Input** — named `InputMap` actions + rebinding + accessibility.
+- ~~**Player**~~ — **implemented** (`src/Player/`): dual switchable control
+  (Arlen / Lysandra), third-person camera-relative controller, spring-arm camera,
+  character switching; movement gated by `GameMode.Exploration`. Movement upgrades
+  later.
+- **Input** — code-registered `InputMap` actions exist (`PlayerInput`); rebinding
+  UI + accessibility later.
 - **Interaction** — inspect / repair / heal targets in the world.
 - **Abilities** — Arlen's Repair / Sense / Heal as reusable components.
 

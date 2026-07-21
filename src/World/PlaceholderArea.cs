@@ -11,14 +11,18 @@ using Lumenfall.Narrative.Relationships;
 namespace Lumenfall.World;
 
 /// <summary>
-/// A stand-in "gameplay" scene that doubles as a live harness for the narrative
-/// simulation. It exercises the core loop (Menu → Play → Pause → Menu) AND lets
-/// you watch the systems react: advance World Time, trigger the Cinder Hollow
-/// hospital-crisis chain, nudge the relationship, and play a real dialogue scene
-/// (with a timed opening choice) that moves relationships, personality and memory.
+/// The sandbox scene's root — a live harness for everything built so far. It
+/// hosts the narrative HUD and debug keys while the child nodes (two
+/// <c>PlayerCharacter</c>s + a <c>PartyController</c>) provide real movement and
+/// character switching. It exercises the core loop (Menu → Play → Pause → Menu)
+/// and lets you watch the systems react: move Arlen/Lysandra, advance World Time,
+/// trigger the Cinder Hollow hospital-crisis chain, nudge the relationship, save
+/// and load, and play a dialogue scene (with a timed choice) that shifts
+/// relationships, personality and memory — during which movement auto-freezes
+/// because the GameMode flips to InteractiveCinematic.
 ///
-/// This will be replaced by the first real area once the Player Controller and
-/// interaction systems exist. Until then it is our window into what we've built.
+/// This is throwaway harness/debug UI; it will be replaced by the first real area
+/// and a proper HUD. It is our window into the systems while they mature.
 /// </summary>
 public partial class PlaceholderArea : Node3D
 {
@@ -283,8 +287,9 @@ public partial class PlaceholderArea : Node3D
     {
         _hint.Text = state == GameState.Paused
             ? "PAUSED\n[Esc] resume   [Backspace] main menu"
-            : "Placeholder Area\n[Esc] pause   [Backspace] menu\n\n" +
-              "SIM:  [T] +1 day  [G] generator fails  [1] repair  [2] ignore  [L] leave\n" +
+            : "MOVE: WASD  run Shift  jump Space  [Q] switch character  (mouse looks)\n" +
+              "[Esc] pause   [Backspace] menu\n" +
+              "SIM:  [T] +1 day  [G] generator  [1] repair  [2] ignore  [L] leave\n" +
               "      [3] warm moment  [4] a hurt  [K] discover affair  [D] dialogue\n" +
               "      [F5] quicksave   [F9] quickload";
     }
