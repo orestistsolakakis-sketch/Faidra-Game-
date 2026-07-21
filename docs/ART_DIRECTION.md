@@ -1,15 +1,27 @@
 # The Heart Engine — Art Direction / Visual Identity
 
 > **Canonical visual bible.** The look everything is built toward. Original —
-> never referencing Arcane or any existing franchise; the influences are
-> *painterly hand-animation* and *lived-in industrial fantasy* in the abstract.
-> Consistent with [`WORLD_BIBLE.md`](WORLD_BIBLE.md) and the levels.
+> never copying any existing franchise. Consistent with
+> [`WORLD_BIBLE.md`](WORLD_BIBLE.md), [`UI_UX_BIBLE.md`](UI_UX_BIBLE.md), and the
+> levels.
+
+## Fidelity target (updated)
+
+**Cinematic realism** — atmospheric, moody, gorgeously lit lived-in industrial
+fantasy (reference *feel*: Detroit: Become Human-class fidelity and mood),
+executed **originally**. This is a deliberate move from the earlier "stylized
+painterly" idea toward **grounded cinematic realism**. Production honesty:
+realism is the **hardest and costliest** target to execute well — it is the North
+Star for concept art and final assets, reached via a real pipeline (concept art →
+modeled/sculpted/textured assets → PBR + volumetric lighting → post-processing),
+not achievable with the current greybox blockouts. The blockouts hold the
+*composition, palette and lighting* until real assets exist.
 
 ## One-line identity
 
-**Warm, hand-painted, lived-in industrial fantasy where amber lamplight and cold
-magical glow share every frame** — brass and worn copper machinery threaded with
-living currents of light, under stylized, dramatic lighting.
+**Warm amber lamplight and cold magical glow sharing every frame** — brass and
+worn copper machinery threaded with living currents of light, in a lived-in,
+grimy, verticality-stacked capital, under low-key cinematic lighting and haze.
 
 ## The core visual tension (our signature)
 
