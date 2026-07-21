@@ -1,9 +1,15 @@
-# Lumenfall *(working title)*
+# The Heart Engine *(title in progress)*
 
-A 3D story-driven adventure of ancient magic and forgotten technology —
-cinematic storytelling, exploration rewarded with hidden lore, environmental
-puzzles, and choices that shape relationships and endings. An original world;
-no borrowed characters, lore, or content.
+A story-driven steampunk-fantasy adventure. In a world where magic flows through
+living **Lifelines** regulated by a hidden machine — the **Heart Engine** — that
+machine is failing, and the truth of why is buried under an official history that
+erased the people who built it. Exploration rewarded with hidden lore,
+environmental puzzles, political mystery, romance, and choices that shape
+relationships and endings. An original world; no borrowed characters or content.
+
+> **Setting canon lives in [`docs/WORLD_BIBLE.md`](docs/WORLD_BIBLE.md)** — the
+> single source of truth for lore. *(The codebase namespace is still the working
+> codename `Lumenfall`; trivially renamed once the final title is locked.)*
 
 > **Status:** early foundation. The project skeleton and core game loop
 > (boot → menu → gameplay → pause → menu) are in place. See
