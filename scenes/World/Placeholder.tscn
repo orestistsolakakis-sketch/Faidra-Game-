@@ -1,0 +1,31 @@
+[gd_scene load_steps=2 format=3 uid="uid://blumenfallworld01"]
+
+[ext_resource type="Script" path="res://src/World/PlaceholderArea.cs" id="1_area"]
+
+[node name="PlaceholderArea" type="Node3D"]
+script = ExtResource("1_area")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 4)
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.707, -0.5, 0.5, 0, 0.707, 0.707, -0.707, -0.5, 0.5, 0, 6, 0)
+
+[node name="Floor" type="MeshInstance3D" parent="."]
+transform = Transform3D(8, 0, 0, 0, 1, 0, 0, 0, 8, 0, 0, 0)
+
+[node name="Hud" type="CanvasLayer" parent="."]
+
+[node name="Hint" type="Label" parent="Hud"]
+unique_name_in_owner = true
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -400.0
+offset_top = 48.0
+offset_right = 400.0
+offset_bottom = 160.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 28
+text = "Placeholder Area"
+horizontal_alignment = 1
