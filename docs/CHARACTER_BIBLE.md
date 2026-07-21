@@ -189,17 +189,27 @@ others simply want power. This makes them arguable, not cartoonish.
 
 ---
 
-## Open threads (to resolve in later passes)
+## Resolved canon decisions
 
-- **The shared surname "Kufstein."** Arlen (Cinder Hollow) and Lysandra (royal
-  Crownspire) share a family name — this needs a deliberate canon answer: are the
-  two separated bloodlines literally branches of one erased family? Is it a clue
-  the player uncovers, a coincidence others weaponize, or a reveal? Strong plot
-  potential; flag for the story-structure pass.
+- **The shared surname "Kufstein" — CANON: deliberate clue, severed branches.**
+  Arlen and Lysandra descend from **one family split generations ago**: the
+  **erased healer branch** (Arlen's line, driven into Cinder Hollow) and the
+  **royal branch** (Lysandra's line, which kept the Heart Engine's authority).
+  They are distant enough that the romance is clean, but the name is a genuine
+  clue the player uncovers. Its reveal reframes the whole official history and is
+  the mechanical embodiment of the world's "two separated halves, neither
+  complete" thesis. The story-structure pass must treat this as the game's
+  central reveal lever.
+- **Control model — CANON: dual playable, switchable.** The player **switches
+  between both leads**: Arlen for repair / sense / combat / traversal sections,
+  Lysandra for social / political / perception sections. This is a major
+  architecture commitment for the Player Controller — see
+  [`ARCHITECTURE.md`](ARCHITECTURE.md) roadmap. Design implication: levels should
+  offer both an "Arlen path" (mechanical/physical) and a "Lysandra path"
+  (social/observational) wherever possible.
+
+## Open threads (later passes)
+
 - **Names** for the four supporting cast members and Arlen's best friend.
 - **The kingdom / capital's proper name** (referenced but unnamed in the world
   bible).
-- **Two playable leads?** Lysandra's dialogue mechanic and Arlen's repair/heal
-  mechanic imply the player may control both. This is a major architecture
-  decision (single protagonist + companion, alternating control, or party) — flag
-  for the Player Controller design.
