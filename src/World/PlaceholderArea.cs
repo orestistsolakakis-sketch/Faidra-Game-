@@ -186,6 +186,9 @@ public partial class PlaceholderArea : Node3D
             w.DialogueRunner.Start(scene))
         {
             _inDialogue = true;
+            // A conversation is an interactive cinematic: movement is suspended,
+            // input routes to choices. (The Player Controller reads this mode.)
+            GameModeManager.Instance.EnterDialogue(interactive: true);
         }
     }
 
@@ -238,6 +241,7 @@ public partial class PlaceholderArea : Node3D
         _choices = new List<DialogueChoice>();
         _line = "";
         _speaker = "";
+        GameModeManager.Instance.ExitToExploration();
         RenderDialogue();
         RefreshReadout();
     }
@@ -298,6 +302,7 @@ public partial class PlaceholderArea : Node3D
         string arlenTrait = w.Personality.GetDominant(Characters.Arlen) ?? "(unformed)";
 
         _readout.Text =
+            $"Mode: {GameModeManager.Instance.Mode}\n" +
             $"World Time: {w.Clock.ToDisplayString()}\n" +
             $"Engine stability: {w.State.GetValue(WorldFacts.Values.HeartEngineStability)}\n" +
             $"Hospital open: {w.State.GetFlag(WorldFacts.Flags.CinderHospitalOpen)}   " +

@@ -59,6 +59,12 @@ The single source of truth for `GameState`. Exposes `Instance`, the current
 `State`, `SetState()`, `TogglePause()`, and the `StateChanged(prev, cur)` signal.
 Also centralises the tree-wide pause flag. **This is the spine.**
 
+### `GameModeManager` (`src/Core/GameModeManager.cs`) — autoload
+Owns the `GameMode` (Exploration / Cinematic / InteractiveCinematic / Decision) —
+a sub-state of `Playing` that decides who receives input. `AcceptsMovement` is
+true only in Exploration; the Player Controller reads it, and dialogue flips the
+mode on start/end. Resets to Exploration whenever gameplay (re)starts.
+
 ### `SceneLoader` (`src/Core/SceneLoader.cs`) — autoload
 Faded, async scene transitions via `TransitionTo(path, stateAfter)`. Owns a
 top-most fade overlay and drives `GameManager` through `Loading` around each
@@ -180,8 +186,8 @@ multi-value relationship model that most of these serve.
    Trust / Understanding / Attraction / Resentment / Dependence, independent.
 5. ~~**Dialogue**~~ — **implemented** (`src/Narrative/Dialogue/`, plus the
    `Personality` model): data-driven graph applying effects to state.
-6. **GameMode layer** — Cinematic / Exploration / Interactive-Cinematic /
-   Decision, including timed choices; extends `GameManager`.
+6. ~~**GameMode layer**~~ — **implemented** (`GameModeManager`): Exploration /
+   Cinematic / Interactive-Cinematic / Decision; gates player input.
 7. ~~**Save/Load**~~ — **implemented** (`src/Narrative/Save/`): one JSON bundle of
    every system's snapshot; tractable *because* the above are plain data.
 

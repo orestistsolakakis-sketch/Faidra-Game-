@@ -17,13 +17,16 @@ config/icon="res://icon.svg"
 project/assembly_name="Lumenfall"
 
 ; Autoloads are global singletons available from any script.
-; GameManager  -> owns high-level game state (the spine of the game).
-; SceneLoader  -> performs async, faded scene transitions.
-; World        -> narrative simulation facade (World Time + fact store).
-; Order matters: services are constructed top-to-bottom.
+; GameManager     -> owns high-level game state (the spine of the game).
+; GameModeManager -> interaction mode within gameplay (Exploration/Cinematic/...).
+; SceneLoader     -> performs async, faded scene transitions.
+; World           -> narrative simulation facade (World Time + fact store).
+; Order matters: services are constructed top-to-bottom (GameModeManager
+; depends on GameManager existing first).
 [autoload]
 
 GameManager="*res://src/Core/GameManager.cs"
+GameModeManager="*res://src/Core/GameModeManager.cs"
 SceneLoader="*res://src/Core/SceneLoader.cs"
 World="*res://src/Narrative/World.cs"
 
