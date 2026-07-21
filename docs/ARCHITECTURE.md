@@ -76,14 +76,32 @@ Declared in `project.godot` under `[autoload]`, in dependency order:
 ## Roadmap (not yet built)
 
 Planned domains, each to be designed → explained → specified → implemented,
-with a checkpoint before starting the next:
+with a checkpoint before starting the next. The narrative simulation systems are
+specified in [`SYSTEMS_BIBLE.md`](SYSTEMS_BIBLE.md) — read it before building any
+of them; it defines World Time, the living world, consequence chains, and the
+multi-value relationship model that most of these serve.
 
-- **Player** — third-person controller, camera, movement upgrades.
+**Gameplay:**
+- **Player** — dual switchable control (Arlen / Lysandra), third-person
+  controller, camera, movement upgrades.
 - **Input** — named `InputMap` actions + rebinding + accessibility.
-- **Dialogue** — data-driven conversation graph + UI.
-- **Quests** — quest/objective tracking + journal.
-- **Relationships** — character affinity affected by choices.
-- **Save/Load** — serialisation of world + progress state.
-- **Inventory / Crafting**, **Skill Tree**, **Lore Database**, **Achievements**.
+- **Interaction** — inspect / repair / heal targets in the world.
+- **Abilities** — Arlen's Repair / Sense / Heal as reusable components.
+
+**Narrative simulation** (recommended build order, per the Systems Bible):
+1. **WorldClock** — the single advancing World Time value.
+2. **WorldState** — authoritative serializable store of facts/flags.
+3. **Consequence/Event system** — data-driven rules over WorldState + WorldClock
+   (the living world and consequence chains).
+4. **RelationshipModel** — Trust / Understanding / Attraction / Resentment /
+   Dependence as independent values.
+5. **Dialogue** — data-driven conversation graph applying effects to state.
+6. **GameMode layer** — Cinematic / Exploration / Interactive-Cinematic /
+   Decision, including timed choices; extends `GameManager`.
+7. **Save/Load** — serialise WorldState + WorldClock + RelationshipModel +
+   progress (tractable *because* the above are plain data).
+
+**Later:** Quests/Journal, Inventory/Crafting, Skill Tree, Lore Database,
+Achievements.
 
 See `README.md` for how to open and run the project.
