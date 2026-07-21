@@ -16,6 +16,10 @@ var camera_pivot: Node3D  # set each frame by the party controller
 var _gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity", 9.8)
 
 
+func _ready() -> void:
+	add_to_group("player")
+
+
 func _physics_process(delta: float) -> void:
 	var v := velocity
 

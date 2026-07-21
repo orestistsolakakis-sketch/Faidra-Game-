@@ -7,15 +7,16 @@
 
 ## Fidelity target (updated)
 
-**Cinematic realism** — atmospheric, moody, gorgeously lit lived-in industrial
-fantasy (reference *feel*: Detroit: Become Human-class fidelity and mood),
-executed **originally**. This is a deliberate move from the earlier "stylized
-painterly" idea toward **grounded cinematic realism**. Production honesty:
-realism is the **hardest and costliest** target to execute well — it is the North
-Star for concept art and final assets, reached via a real pipeline (concept art →
-modeled/sculpted/textured assets → PBR + volumetric lighting → post-processing),
-not achievable with the current greybox blockouts. The blockouts hold the
-*composition, palette and lighting* until real assets exist.
+**Stylized realism (cinematic middle ground)** — the atmosphere, mood and
+lighting of the reference feel (Detroit: Become Human-class presentation), but
+proportions/materials **slightly stylized** rather than fully photoreal. This is
+the chosen target: it keeps the cinematic weight while staying **achievable for a
+small team** (photoreal is the costliest thing to execute well; a stylized-real
+hybrid is far more attainable and ages better). Executed **originally**. It is the
+North Star for concept art and final assets, reached via a real pipeline (concept
+art → modeled/textured assets → PBR + volumetric lighting → post), not achievable
+with the current greybox blockouts — which hold the *composition, palette and
+lighting* until real assets exist.
 
 ## One-line identity
 

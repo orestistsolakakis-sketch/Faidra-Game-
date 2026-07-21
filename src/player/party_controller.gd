@@ -11,6 +11,9 @@ extends Node3D
 @export var follow_responsiveness := 12.0
 @export var eye_height := 1.4
 
+## Emitted when control switches to another lead. Arg: that character's id.
+signal active_character_changed(character_id: String)
+
 var _characters: Array = []
 var _pivot: Node3D
 var _spring: SpringArm3D
@@ -65,4 +68,4 @@ func _set_active(index: int) -> void:
 	for i in _characters.size():
 		_characters[i].is_active = i == index
 		_characters[i].camera_pivot = _pivot
-	print("[Party] Now controlling: %s" % _characters[index].character_id)
+	active_character_changed.emit(_characters[index].character_id)

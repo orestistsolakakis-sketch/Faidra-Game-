@@ -3,7 +3,8 @@ class_name RelationshipModel extends RefCounted
 ## is the same bond as Lysandra<->Arlen). The read/write surface event outcomes
 ## and dialogue choices use to move the axes. Pairs are created lazily.
 
-signal changed(character_a: String, character_b: String, axis: int)
+## Args: the pair (normalized order), the axis, and the signed delta that moved it.
+signal changed(character_a: String, character_b: String, axis: int, delta: int)
 
 var _relationships: Dictionary = {}  # "a|b" -> Relationship
 
@@ -20,15 +21,19 @@ func get_axis(a: String, b: String, axis: int) -> int:
 
 
 func set_axis(a: String, b: String, axis: int, value: int) -> void:
-	if between(a, b).set_axis(axis, value):
+	var rel := between(a, b)
+	var before := rel.get_axis(axis)
+	if rel.set_axis(axis, value):
 		var pair := _ordered(a, b)
-		changed.emit(pair[0], pair[1], axis)
+		changed.emit(pair[0], pair[1], axis, rel.get_axis(axis) - before)
 
 
 func adjust(a: String, b: String, axis: int, delta: int) -> void:
-	if between(a, b).adjust(axis, delta):
+	var rel := between(a, b)
+	var before := rel.get_axis(axis)
+	if rel.adjust(axis, delta):
 		var pair := _ordered(a, b)
-		changed.emit(pair[0], pair[1], axis)
+		changed.emit(pair[0], pair[1], axis, rel.get_axis(axis) - before)
 
 
 func snapshot() -> Dictionary:
