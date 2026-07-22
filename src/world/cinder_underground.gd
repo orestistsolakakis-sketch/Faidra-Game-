@@ -102,9 +102,7 @@ func _add(mesh: Mesh, pos: Vector3, mat: StandardMaterial3D) -> void:
 
 func _mat(c: Color) -> StandardMaterial3D:
 	var m := StandardMaterial3D.new()
-	# Unshaded: lit shading fails to render on some WebGL drivers (see cinder_hollow.gd).
-	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	m.albedo_color = c * 1.3 + Color(0.03, 0.03, 0.04)
+	m.albedo_color = c
 	m.roughness = 0.9
 	return m
 

@@ -570,26 +570,13 @@ func _mat(c: Color) -> StandardMaterial3D:
 	var m := StandardMaterial3D.new()
 	m.albedo_color = c
 	m.roughness = 0.9
-	# NOTE: the lit shading path fails to render on some WebGL/GL drivers (lit meshes
-	# come out invisible while unshaded ones draw). Fake cheap directional shading by
-	# baking a little top-down gradient into vertex colors is overkill for a greybox;
-	# instead render unshaded but tint by a fixed "sky vs ground" ambient so surfaces
-	# still read with depth. Keeps the town visible everywhere.
-	# DIAGNOSTIC (BUILD 19): force everything bright GREEN + unshaded. If the screen
-	# turns green, materials render and the earlier pink was my test cube/emissive.
-	# If it stays PINK, the GPU can't compile Godot's spatial shader (magenta = the
-	# engine's shader-error fallback) and no material change can help.
-	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	m.albedo_color = Color(0.1, 0.9, 0.3)
 	return m
 
 
 func _emissive(c: Color, energy: float) -> StandardMaterial3D:
 	var m := StandardMaterial3D.new()
-	# DIAGNOSTIC (BUILD 19): force green so ALL geometry is green if materials render.
-	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	m.albedo_color = Color(0.1, 0.9, 0.3)
+	m.albedo_color = c
 	m.emission_enabled = true
-	m.emission = Color(0.1, 0.9, 0.3)
+	m.emission = c
 	m.emission_energy_multiplier = energy
 	return m
