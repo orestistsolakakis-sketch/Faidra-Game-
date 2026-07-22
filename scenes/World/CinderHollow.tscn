@@ -7,6 +7,7 @@
 [ext_resource type="Script" path="res://src/world/cinder_hollow.gd" id="5_env"]
 [ext_resource type="Script" path="res://src/ui/game_hud.gd" id="6_hud"]
 [ext_resource type="Script" path="res://src/interaction/interactable.gd" id="7_inter"]
+[ext_resource type="Script" path="res://src/world/debug_cam.gd" id="8_dbg"]
 
 [sub_resource type="BoxShape3D" id="FloorShape"]
 size = Vector3(120, 1, 130)
@@ -72,7 +73,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, 10)
 spring_length = 5.5
 
 [node name="Camera3D" type="Camera3D" parent="CameraPivot/SpringArm3D"]
-current = true
+current = false
 
 [node name="PartyController" type="Node3D" parent="."]
 process_mode = 3
@@ -163,6 +164,9 @@ shape = SubResource("SphereBig")
 [node name="TestBox" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 2)
 mesh = SubResource("TestMesh")
+
+[node name="DebugCam" type="Camera3D" parent="."]
+script = ExtResource("8_dbg")
 
 [node name="Hud" type="CanvasLayer" parent="."]
 unique_name_in_owner = true
