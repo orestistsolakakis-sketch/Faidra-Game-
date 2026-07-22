@@ -60,3 +60,18 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(320, 56)
 layout_mode = 2
 text = "Quit"
+
+[node name="Build" type="Label" parent="."]
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = -44.0
+offset_right = -24.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_font_sizes/font_size = 20
+text = "BUILD 09  —  Cinder Hollow city grid + underground railway"
+horizontal_alignment = 1
