@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://src/world/cinder_hollow_root.gd" id="1_root"]
 [ext_resource type="Script" path="res://src/player/player_character.gd" id="2_char"]
 [ext_resource type="Script" path="res://src/player/party_controller.gd" id="3_party"]
-[ext_resource type="Script" path="res://src/player/character_billboard.gd" id="4_bb"]
+[ext_resource type="Script" path="res://src/player/character_model.gd" id="4_model"]
 [ext_resource type="Script" path="res://src/world/cinder_hollow.gd" id="5_env"]
 [ext_resource type="Script" path="res://src/ui/game_hud.gd" id="6_hud"]
 [ext_resource type="Script" path="res://src/interaction/interactable.gd" id="7_inter"]
@@ -48,10 +48,11 @@ character_id = "arlen"
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
 shape = SubResource("CapShape")
 
-[node name="Billboard" type="Sprite3D" parent="Arlen"]
-script = ExtResource("4_bb")
-texture_path = "res://assets/art/characters/arlen.png"
-target_height = 2.3
+[node name="Model" type="MeshInstance3D" parent="Arlen"]
+script = ExtResource("4_model")
+model_path = "res://assets/models/arlen.obj"
+tint = Color(0.8, 0.78, 0.82, 1)
+yaw_offset_deg = 0.0
 
 [node name="CameraPivot" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, 10)
