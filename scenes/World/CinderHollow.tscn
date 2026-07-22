@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://blumenfallcinder01"]
+[gd_scene load_steps=12 format=3 uid="uid://blumenfallcinder01"]
 
 [ext_resource type="Script" path="res://src/world/cinder_hollow_root.gd" id="1_root"]
 [ext_resource type="Script" path="res://src/player/player_character.gd" id="2_char"]
@@ -7,7 +7,6 @@
 [ext_resource type="Script" path="res://src/world/cinder_hollow.gd" id="5_env"]
 [ext_resource type="Script" path="res://src/ui/game_hud.gd" id="6_hud"]
 [ext_resource type="Script" path="res://src/interaction/interactable.gd" id="7_inter"]
-[ext_resource type="Script" path="res://src/world/debug_cam.gd" id="8_dbg"]
 
 [sub_resource type="BoxShape3D" id="FloorShape"]
 size = Vector3(120, 1, 130)
@@ -21,17 +20,6 @@ radius = 3.0
 
 [sub_resource type="SphereShape3D" id="SphereSmall"]
 radius = 2.5
-
-[sub_resource type="StandardMaterial3D" id="TestMat"]
-shading_mode = 0
-albedo_color = Color(1, 0, 1, 1)
-emission_enabled = true
-emission = Color(1, 0, 1, 1)
-emission_energy_multiplier = 2.0
-
-[sub_resource type="BoxMesh" id="TestMesh"]
-material = SubResource("TestMat")
-size = Vector3(4, 4, 4)
 
 [node name="CinderHollow" type="Node3D"]
 script = ExtResource("1_root")
@@ -73,7 +61,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, 10)
 spring_length = 5.5
 
 [node name="Camera3D" type="Camera3D" parent="CameraPivot/SpringArm3D"]
-current = false
+current = true
 
 [node name="PartyController" type="Node3D" parent="."]
 process_mode = 3
@@ -160,13 +148,6 @@ verb = "Descend"
 
 [node name="Shape" type="CollisionShape3D" parent="RailStation"]
 shape = SubResource("SphereBig")
-
-[node name="TestBox" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 2)
-mesh = SubResource("TestMesh")
-
-[node name="DebugCam" type="Camera3D" parent="."]
-script = ExtResource("8_dbg")
 
 [node name="Hud" type="CanvasLayer" parent="."]
 unique_name_in_owner = true

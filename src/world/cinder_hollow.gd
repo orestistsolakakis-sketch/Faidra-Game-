@@ -570,6 +570,13 @@ func _mat(c: Color) -> StandardMaterial3D:
 	var m := StandardMaterial3D.new()
 	m.albedo_color = c
 	m.roughness = 0.9
+	# NOTE: the lit shading path fails to render on some WebGL/GL drivers (lit meshes
+	# come out invisible while unshaded ones draw). Fake cheap directional shading by
+	# baking a little top-down gradient into vertex colors is overkill for a greybox;
+	# instead render unshaded but tint by a fixed "sky vs ground" ambient so surfaces
+	# still read with depth. Keeps the town visible everywhere.
+	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	m.albedo_color = c * 1.35 + Color(0.04, 0.04, 0.05)
 	return m
 
 

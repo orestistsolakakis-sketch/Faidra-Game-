@@ -15,8 +15,8 @@ func _ready() -> void:
 		if res is Mesh:
 			mesh = res
 			var mat := StandardMaterial3D.new()
+			mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 			mat.albedo_color = tint
-			mat.roughness = 0.65
 			material_override = mat
 		elif res is PackedScene:
 			# glTF imports as a scene with its own materials/textures.
