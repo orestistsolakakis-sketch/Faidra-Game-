@@ -129,6 +129,16 @@ verb = "Talk"
 [node name="Shape" type="CollisionShape3D" parent="MerchantRennick"]
 shape = SubResource("SphereSmall")
 
+[node name="ResidentDara" type="Area3D" parent="." groups=["interactable"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 1, 0.2)
+script = ExtResource("7_inter")
+id = "resident_dara"
+label = "Dara"
+verb = "Talk"
+
+[node name="Shape" type="CollisionShape3D" parent="ResidentDara"]
+shape = SubResource("SphereSmall")
+
 [node name="Hud" type="CanvasLayer" parent="."]
 unique_name_in_owner = true
 script = ExtResource("6_hud")

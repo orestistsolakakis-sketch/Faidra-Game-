@@ -9,15 +9,16 @@ var clock := WorldClock.new()
 var state := WorldState.new()
 var relationships := RelationshipModel.new()
 var personality := PersonalityModel.new()
+var traits := TraitModel.new()
 var events: EventManager
 var dialogue := DialogueLibrary.new()
 var dialogue_runner: DialogueRunner
 
 
 func _init() -> void:
-	# Every system shares the same clock, state, relationships and personality.
-	events = EventManager.new(clock, state, relationships, personality)
-	var context := ConsequenceContext.new(clock, state, events, relationships, personality)
+	# Every system shares the same clock, state, relationships, personality, traits.
+	events = EventManager.new(clock, state, relationships, personality, traits)
+	var context := ConsequenceContext.new(clock, state, events, relationships, personality, traits)
 	dialogue_runner = DialogueRunner.new(context)
 
 
@@ -35,6 +36,8 @@ func new_game() -> void:
 	events.reset()
 	relationships.reset()
 	personality.reset()
+	traits.reset()
+	traits.seed_defaults()
 	dialogue.clear()
 
 	_register_content()
@@ -68,6 +71,7 @@ func capture_save() -> Dictionary:
 		"events": events.snapshot(),
 		"relationships": relationships.snapshot(),
 		"personality": personality.snapshot(),
+		"traits": traits.snapshot(),
 	}
 
 
@@ -84,6 +88,7 @@ func load_game(data: Dictionary) -> void:
 	events.restore(data.get("events", {}))
 	relationships.restore(data.get("relationships", {}))
 	personality.restore(data.get("personality", {}))
+	traits.restore(data.get("traits", {}))
 
 	GameManager.set_state(GameState.PLAYING)
 	print("[World] Loaded. %s" % clock.to_display_string())

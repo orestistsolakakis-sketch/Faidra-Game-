@@ -69,6 +69,8 @@ func _interact(which: Node) -> void:
 			_start_scene(CinderHollowScenes.FEN_MARKET_ID)
 		"merchant_rennick":
 			_start_scene(CinderHollowScenes.RENNICK_MARKET_ID)
+		"resident_dara":
+			_start_scene(CinderHollowScenes.DARA_ID)
 		"neighbor":
 			_hud.push_toast("", "A wet, rattling cough behind the door. It started three days ago.")
 		"lift":

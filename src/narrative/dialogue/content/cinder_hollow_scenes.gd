@@ -7,12 +7,43 @@ class_name CinderHollowScenes
 const BRAM_INTRO_ID := "CINDER_BRAM_INTRO"
 const FEN_MARKET_ID := "CINDER_FEN_MARKET"
 const RENNICK_MARKET_ID := "CINDER_RENNICK_MARKET"
+const DARA_ID := "CINDER_DARA"
 
 
 static func register_into(library: DialogueLibrary) -> void:
 	library.register(_build_bram_intro())
 	library.register(_build_fen())
 	library.register(_build_rennick())
+	library.register(_build_dara())
+
+
+# --- Trait/personality effect helpers (single-line lambdas call these) ---
+
+static func _help(ctx) -> void:
+	ctx.personality.add(Characters.ARLEN, PersonalityTraits.Arlen.COMPASSIONATE)
+	ctx.traits.adjust(Traits.COMPASSION, 6)
+
+
+static func _selfish(ctx) -> void:
+	ctx.personality.add(Characters.ARLEN, PersonalityTraits.Arlen.CYNICAL)
+	ctx.traits.adjust(Traits.CUNNING, 5)
+
+
+static func _brave(ctx) -> void:
+	ctx.personality.add(Characters.ARLEN, PersonalityTraits.Arlen.PROTECTIVE)
+	ctx.traits.adjust(Traits.COURAGE, 6)
+
+
+static func _shrewd(ctx) -> void:
+	ctx.traits.adjust(Traits.CUNNING, 5)
+
+
+static func _perceptive(ctx) -> void:
+	ctx.traits.adjust(Traits.INSIGHT, 6)
+
+
+static func _steady(ctx) -> void:
+	ctx.traits.adjust(Traits.RESOLVE, 5)
 
 
 static func _build_fen() -> DialogueScene:
@@ -34,9 +65,10 @@ static func _fen_open() -> DialogueNode:
 	n.speaker = "fen"
 	n.text = "Steam-bread, hot off the vent! ...You're the Kufstein girl. The one who fixes things. Heard the lower row's coughing black?"
 	n.choices = [
-		DialogueChoice.make("\"What have you heard?\"", "info", DialogueTone.HONEST),
+		DialogueChoice.make("\"What have you heard?\"", "info", DialogueTone.HONEST,
+			func(ctx): CinderHollowScenes._perceptive(ctx)),
 		DialogueChoice.make("\"I'm handling it.\"", "info", DialogueTone.DEFENSIVE,
-			func(ctx): ctx.personality.add(Characters.ARLEN, PersonalityTraits.Arlen.INDEPENDENT)),
+			func(ctx): CinderHollowScenes._steady(ctx)),
 	]
 	return n
 
@@ -60,8 +92,10 @@ static func _rennick_open() -> DialogueNode:
 	n.speaker = "rennick"
 	n.text = "Parts? Got parts. Half of 'em cursed, all of 'em cheap. ...You're after the lift. Everyone is."
 	n.choices = [
-		DialogueChoice.make("\"Tell me about the lift.\"", "info", DialogueTone.HONEST),
-		DialogueChoice.make("\"Just looking.\"", "info", DialogueTone.SARCASTIC),
+		DialogueChoice.make("\"Tell me about the lift.\"", "info", DialogueTone.HONEST,
+			func(ctx): CinderHollowScenes._perceptive(ctx)),
+		DialogueChoice.make("\"Just looking.\"", "info", DialogueTone.SARCASTIC,
+			func(ctx): CinderHollowScenes._shrewd(ctx)),
 	]
 	return n
 
@@ -92,9 +126,9 @@ static func _why_node() -> DialogueNode:
 	n.text = "A door that won't open is a problem I can actually fix. What's wrong with everyone?"
 	n.choices = [
 		DialogueChoice.make("\"Tell me who's sick. I want to help.\"", "sickness", DialogueTone.HONEST,
-			func(ctx): ctx.personality.add(Characters.ARLEN, PersonalityTraits.Arlen.COMPASSIONATE)),
+			func(ctx): CinderHollowScenes._help(ctx)),
 		DialogueChoice.make("\"Not my circus. I hunt parts, not cures.\"", "sickness", DialogueTone.DEFENSIVE,
-			func(ctx): ctx.personality.add(Characters.ARLEN, PersonalityTraits.Arlen.CYNICAL)),
+			func(ctx): CinderHollowScenes._selfish(ctx)),
 	]
 	return n
 
@@ -106,9 +140,9 @@ static func _care_node() -> DialogueNode:
 	n.text = "A dead lift and a sickness that starts at the bottom of the district. That's not a coincidence."
 	n.choices = [
 		DialogueChoice.make("\"I'm going down there.\"", "end_soft", DialogueTone.HONEST,
-			func(ctx): ctx.personality.add(Characters.ARLEN, PersonalityTraits.Arlen.PROTECTIVE)),
+			func(ctx): CinderHollowScenes._brave(ctx)),
 		DialogueChoice.make("\"If it pays, I'll look.\"", "end_hard", DialogueTone.SARCASTIC,
-			func(ctx): ctx.personality.add(Characters.ARLEN, PersonalityTraits.Arlen.INDEPENDENT)),
+			func(ctx): CinderHollowScenes._shrewd(ctx)),
 	]
 	return n
 
@@ -119,6 +153,37 @@ static func _end_node(text: String) -> DialogueNode:
 	n.text = text
 	n.on_enter = func(ctx): ctx.state.set_flag(WorldFacts.Flags.TALKED_TO_BRAM, true)
 	n.next = ""
+	return n
+
+
+static func _build_dara() -> DialogueScene:
+	var scene := DialogueScene.new()
+	scene.id = DARA_ID
+	scene.location = "Cinder Hollow — Residences"
+	scene.participants = [Characters.ARLEN]
+	scene.start_node_id = "open"
+	scene.nodes = {
+		"open": _dara_open(),
+		"promise": _line("dara", "Bless you. Bring it through the Drain Sector — the low road's faster than the dead lift.", ""),
+		"cold": _line("dara", "...No. No, of course not. Nobody can. Go on, then.", ""),
+		"insight": _line("dara", "...You see it too. The black in the creases of his hands. That's not fever — that's a Lifeline gone wrong.", ""),
+	}
+	return scene
+
+
+static func _dara_open() -> DialogueNode:
+	var n := DialogueNode.new()
+	n.id = "open"
+	n.speaker = "dara"
+	n.text = "My littlest won't stop coughing, and the medicine's past the dead lift. I can't leave the little ones. You're the mechanic, aren't you?"
+	n.choices = [
+		DialogueChoice.make("\"I'll bring your medicine back.\"", "promise", DialogueTone.HONEST,
+			func(ctx): CinderHollowScenes._help(ctx)),
+		DialogueChoice.make("[Insight] \"Let me see his hands — I can tell how far it's gone.\"", "insight", DialogueTone.CONFRONT,
+			func(ctx): CinderHollowScenes._perceptive(ctx),
+			func(ctx): return ctx.traits.meets(Traits.INSIGHT, 25)),
+		DialogueChoice.make("\"I can't promise anything.\"", "cold", DialogueTone.DEFENSIVE),
+	]
 	return n
 
 

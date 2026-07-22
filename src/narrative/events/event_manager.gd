@@ -19,8 +19,8 @@ var _context: ConsequenceContext
 var _evaluating := false
 
 
-func _init(clock: WorldClock, state: WorldState, relationships: RelationshipModel, personality: PersonalityModel) -> void:
-	_context = ConsequenceContext.new(clock, state, self, relationships, personality)
+func _init(clock: WorldClock, state: WorldState, relationships: RelationshipModel, personality: PersonalityModel, traits: TraitModel) -> void:
+	_context = ConsequenceContext.new(clock, state, self, relationships, personality, traits)
 
 
 func register(evt: WorldEvent) -> void:

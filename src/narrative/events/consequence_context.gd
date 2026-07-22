@@ -10,11 +10,13 @@ var state: WorldState
 var events  # EventManager
 var relationships: RelationshipModel
 var personality: PersonalityModel
+var traits: TraitModel
 
 
-func _init(p_clock: WorldClock, p_state: WorldState, p_events, p_relationships: RelationshipModel, p_personality: PersonalityModel) -> void:
+func _init(p_clock: WorldClock, p_state: WorldState, p_events, p_relationships: RelationshipModel, p_personality: PersonalityModel, p_traits: TraitModel) -> void:
 	clock = p_clock
 	state = p_state
 	events = p_events
 	relationships = p_relationships
 	personality = p_personality
+	traits = p_traits

@@ -22,6 +22,8 @@ var _interact: PanelContainer
 var _interact_label: Label
 var _toasts: VBoxContainer
 var _debug: Label
+var _traits_panel: PanelContainer
+var _trait_labels: Dictionary = {}
 
 var _root: Control
 var _dialogue: PanelContainer
@@ -48,7 +50,10 @@ func _ready() -> void:
 	World.dialogue_runner.choices_offered.connect(_on_dialogue_choices)
 	World.dialogue_runner.scene_ended.connect(_on_dialogue_ended)
 
+	World.traits.changed.connect(_on_trait_changed)
+
 	_update_day()
+	_update_traits()
 
 
 # --- Public API (called by the game controller) --------------------------------
@@ -184,9 +189,16 @@ func _process(delta: float) -> void:
 
 
 func _input(event: InputEvent) -> void:
-	if not _in_dialogue or not (event is InputEventKey and event.pressed):
+	if not (event is InputEventKey and event.pressed):
 		return
 	var key: int = event.keycode
+
+	if not _in_dialogue:
+		if key == KEY_C:
+			toggle_traits()
+			get_viewport().set_input_as_handled()
+		return
+
 	if _choices.is_empty():
 		if key == KEY_SPACE or key == KEY_ENTER or key == KEY_KP_ENTER:
 			World.dialogue_runner.advance()
@@ -264,6 +276,13 @@ func _build() -> void:
 	_party.position = Vector2(28, -44)
 	root.add_child(_party)
 
+	var controls := _make_label("[E] Interact    [C] Traits", 14, DIM)
+	controls.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+	controls.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	controls.offset_right = -28
+	controls.offset_bottom = -26
+	root.add_child(controls)
+
 	_toasts = VBoxContainer.new()
 	_toasts.set_anchors_preset(Control.PRESET_TOP_LEFT)
 	_toasts.position = Vector2(28, 92)
@@ -290,7 +309,50 @@ func _build() -> void:
 	_debug.visible = false
 	root.add_child(_debug)
 
+	_build_traits(root)
 	_build_dialogue(root)
+
+
+func _build_traits(root: Control) -> void:
+	_traits_panel = PanelContainer.new()
+	_traits_panel.add_theme_stylebox_override("panel", _stylebox(PANEL_BG, PANEL_BORDER))
+	_traits_panel.set_anchors_preset(Control.PRESET_CENTER_RIGHT)
+	_traits_panel.offset_left = -280
+	_traits_panel.offset_right = -28
+	_traits_panel.offset_top = -140
+	_traits_panel.visible = false
+	var margin := MarginContainer.new()
+	for side in ["left", "right", "top", "bottom"]:
+		margin.add_theme_constant_override("margin_" + side, 14)
+	var col := VBoxContainer.new()
+	col.add_theme_constant_override("separation", 8)
+	col.add_child(_make_label("ARLEN — TRAITS   [C]", 14, GOLD))
+	for trait_id in Traits.ALL:
+		var label := _make_label("", 17, TEXT)
+		_trait_labels[trait_id] = label
+		col.add_child(label)
+	margin.add_child(col)
+	_traits_panel.add_child(margin)
+	root.add_child(_traits_panel)
+
+
+func toggle_traits() -> void:
+	_traits_panel.visible = not _traits_panel.visible
+	if _traits_panel.visible:
+		_update_traits()
+
+
+func _update_traits() -> void:
+	for trait_id in _trait_labels:
+		var v: int = World.traits.get_value(trait_id)
+		var bar := "█".repeat(int(round(v / 10.0)))
+		_trait_labels[trait_id].text = "%s   %d%%   %s" % [Traits.display_name(trait_id), v, bar]
+
+
+func _on_trait_changed(trait_id: String, delta: int) -> void:
+	var sign_str := "+" if delta > 0 else ""
+	push_toast("", "%s %s%d%%" % [Traits.display_name(trait_id), sign_str, delta])
+	_update_traits()
 
 
 func _build_dialogue(root: Control) -> void:
@@ -365,6 +427,7 @@ func _display(id: String) -> String:
 		"arlen_best_friend": return "Bram"
 		"fen": return "Fen · Steam-bread"
 		"rennick": return "Old Rennick · Scrap"
+		"dara": return "Dara · Mother of three"
 		"": return ""
 		_: return id
 

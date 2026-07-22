@@ -99,6 +99,9 @@ func _build_district() -> void:
 	_npc(Vector3(-4.2, 0, 1.5), Color(0.55, 0.4, 0.22))   # Fen, the steam-bread seller
 	_npc(Vector3(4.2, 0, -3.5), Color(0.4, 0.36, 0.3))    # Old Rennick, the scrap dealer
 
+	# --- Residential quarter (a courtyard off the main street) ---
+	_residential(Vector3(-13, 0, -2))
+
 	# --- Ambient life: spinning fans and drifting steam ---
 	_fan(Vector3(-6.7, 4.5, 6), Vector3(0, 0, 1))
 	_fan(Vector3(6.7, 5.5, -8), Vector3(0, 0, 1))
@@ -252,6 +255,40 @@ func _npc(pos: Vector3, coat: Color) -> void:
 	n.position = pos
 	n.rotation.y = _rng.randf_range(-PI, PI)
 	add_child(n)
+
+
+func _kid(pos: Vector3, coat: Color) -> void:
+	var n := Blockout.new()
+	n.body_color = coat
+	n.accent_color = Color(0.14, 0.14, 0.16)
+	n.skin_color = Color(0.72, 0.57, 0.47)
+	n.position = pos
+	n.rotation.y = _rng.randf_range(-PI, PI)
+	n.scale = Vector3(0.62, 0.62, 0.62)  # child-sized
+	add_child(n)
+
+
+func _residential(o: Vector3) -> void:
+	# Homes stacked around a small courtyard.
+	_building(o + Vector3(-5, 0, 0))
+	_building(o + Vector3(5, 0, -2))
+	_building(o + Vector3(0, 0, -6))
+
+	# A laundry line strung across the courtyard (rope + hanging cloth).
+	_box(Vector3(9, 0.04, 0.04), o + Vector3(0, 3.2, 0), _mat(Color(0.1, 0.08, 0.06)))
+	var cloth := [Color(0.6, 0.55, 0.5), Color(0.4, 0.45, 0.5), Color(0.55, 0.4, 0.35)]
+	for i in range(-3, 4):
+		_box(Vector3(0.5, 0.7, 0.04), o + Vector3(i * 1.2, 2.75, 0), _mat(cloth[(i + 3) % 3]))
+
+	# A warm brazier the families gather at.
+	_brazier(o + Vector3(0, 0, 1.5))
+
+	# Dara (mother you can talk to) and neighbours; two kids playing.
+	_npc(o + Vector3(0, 0, 2.2), Color(0.45, 0.30, 0.35))   # Dara
+	_npc(o + Vector3(-2.4, 0, 1.2), Color(0.32, 0.28, 0.40))
+	_npc(o + Vector3(2.6, 0, -0.8), Color(0.30, 0.34, 0.30))
+	_kid(o + Vector3(-1.1, 0, 2.6), Color(0.55, 0.30, 0.30))
+	_kid(o + Vector3(1.3, 0, 2.3), Color(0.30, 0.42, 0.55))
 
 
 func _box(size: Vector3, pos: Vector3, mat: StandardMaterial3D) -> void:
