@@ -77,7 +77,7 @@ static func _build_food_shortage() -> WorldEvent:
 	e.condition = func(ctx):
 		if ctx.state.get_flag(WorldFacts.Flags.CINDER_FOOD_RESTORED):
 			return false
-		var left_day := ctx.state.get_value(WorldFacts.Values.LEFT_CINDER_DAY)
+		var left_day: int = ctx.state.get_value(WorldFacts.Values.LEFT_CINDER_DAY)
 		if left_day <= 0:
 			return false
 		return ctx.clock.day() - left_day >= 30
