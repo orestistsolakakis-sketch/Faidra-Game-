@@ -46,7 +46,22 @@ const ROAD_W := 6.0
 func _ready() -> void:
 	_rng.seed = 71
 	_setup_environment()
+	_diag_cube(Vector3(5, 2, 3), Color(0, 1, 1))     # BEFORE build: cyan (runtime mesh test)
 	_build_town()
+	_diag_cube(Vector3(-5, 2, 3), Color(1, 1, 0))    # AFTER build: yellow (proves build finished)
+
+
+func _diag_cube(pos: Vector3, col: Color) -> void:
+	var mi := MeshInstance3D.new()
+	var bm := BoxMesh.new()
+	bm.size = Vector3(3, 3, 3)
+	mi.mesh = bm
+	var m := StandardMaterial3D.new()
+	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	m.albedo_color = col
+	mi.material_override = m
+	mi.position = pos
+	add_child(mi)
 
 
 func _setup_environment() -> void:
