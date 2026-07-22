@@ -51,9 +51,11 @@ const ROAD_W := 6.0
 func _ready() -> void:
 	_rng.seed = 71
 	_setup_environment()
-	_diag_cube(Vector3(5, 2, 3), Color(0, 1, 1))     # BEFORE build: cyan (runtime mesh test)
+	# Defer to after the first frame: on web, meshes added during _ready (before the
+	# renderer is fully live) can fail to register. Building post-frame may fix it.
+	await get_tree().process_frame
+	_diag_cube(Vector3(-4, 2, 3), Color(0, 1, 0))    # green: runtime mesh, added post-frame
 	_build_town()
-	_diag_cube(Vector3(-5, 2, 3), Color(1, 1, 0))    # AFTER build: yellow (proves build finished)
 
 
 func _diag_cube(pos: Vector3, col: Color) -> void:

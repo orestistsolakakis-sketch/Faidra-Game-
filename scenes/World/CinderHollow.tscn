@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3 uid="uid://blumenfallcinder01"]
+[gd_scene load_steps=20 format=3 uid="uid://blumenfallcinder01"]
 
 [ext_resource type="Script" path="res://src/world/cinder_hollow_root.gd" id="1_root"]
 [ext_resource type="Script" path="res://src/player/player_character.gd" id="2_char"]
@@ -40,6 +40,16 @@ size = Vector3(0.2, 0.2, 0.2)
 [sub_resource type="BoxMesh" id="PrimerEmisMesh"]
 material = ExtResource("9_emis")
 size = Vector3(0.2, 0.2, 0.2)
+
+[sub_resource type="StandardMaterial3D" id="BlueLitMat"]
+albedo_color = Color(0.2, 0.4, 1, 1)
+emission_enabled = true
+emission = Color(0.2, 0.4, 1, 1)
+emission_energy_multiplier = 1.5
+
+[sub_resource type="BoxMesh" id="BlueLitMesh"]
+material = SubResource("BlueLitMat")
+size = Vector3(3, 3, 3)
 
 [node name="CinderHollow" type="Node3D"]
 script = ExtResource("1_root")
@@ -180,6 +190,10 @@ mesh = SubResource("PrimerLitMesh")
 [node name="PrimerEmis" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.4, 0.5, 6)
 mesh = SubResource("PrimerEmisMesh")
+
+[node name="BakedBlue" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 2, 3)
+mesh = SubResource("BlueLitMesh")
 
 [node name="Hud" type="CanvasLayer" parent="."]
 unique_name_in_owner = true
