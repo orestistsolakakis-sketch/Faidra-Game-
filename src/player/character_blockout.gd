@@ -48,9 +48,11 @@ func _add(mesh: Mesh, pos: Vector3, mat: StandardMaterial3D) -> void:
 	add_child(mi)
 
 
+const LIT_MAT := preload("res://assets/materials/town_lit.tres")
+
+
 func _mat(c: Color) -> StandardMaterial3D:
-	var m := StandardMaterial3D.new()
+	# Preloaded resource (shader compiled into the export) so NPCs render on web.
+	var m: StandardMaterial3D = LIT_MAT.duplicate()
 	m.albedo_color = c
-	m.roughness = 0.75
-	m.metallic = 0.0
 	return m

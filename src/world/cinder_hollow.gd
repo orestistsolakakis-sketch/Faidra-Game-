@@ -13,6 +13,11 @@ const Blockout := preload("res://src/player/character_blockout.gd")
 const Wanderer := preload("res://src/world/npc_wanderer.gd")
 const Spinner := preload("res://src/world/spinner.gd")
 
+# Preloaded material resources: their shaders are compiled into the export, so
+# runtime meshes render on web (runtime-BUILT materials don't compile in-browser).
+const LIT_MAT := preload("res://assets/materials/town_lit.tres")
+const EMIS_MAT := preload("res://assets/materials/town_emissive.tres")
+
 const WARM := Color(1.0, 0.72, 0.38)
 const FORGE := Color(1.0, 0.5, 0.2)
 const TEAL := Color(0.31, 0.84, 0.76)
@@ -56,10 +61,7 @@ func _diag_cube(pos: Vector3, col: Color) -> void:
 	var bm := BoxMesh.new()
 	bm.size = Vector3(3, 3, 3)
 	mi.mesh = bm
-	var m := StandardMaterial3D.new()
-	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	m.albedo_color = col
-	mi.material_override = m
+	mi.material_override = _emissive(col, 1.5)  # uses the preloaded-material path
 	mi.position = pos
 	add_child(mi)
 
@@ -582,16 +584,14 @@ func _add(mesh: Mesh, pos: Vector3, mat: StandardMaterial3D) -> void:
 
 
 func _mat(c: Color) -> StandardMaterial3D:
-	var m := StandardMaterial3D.new()
+	var m: StandardMaterial3D = LIT_MAT.duplicate()
 	m.albedo_color = c
-	m.roughness = 0.9
 	return m
 
 
 func _emissive(c: Color, energy: float) -> StandardMaterial3D:
-	var m := StandardMaterial3D.new()
+	var m: StandardMaterial3D = EMIS_MAT.duplicate()
 	m.albedo_color = c
-	m.emission_enabled = true
 	m.emission = c
 	m.emission_energy_multiplier = energy
 	return m
