@@ -51,16 +51,18 @@ func _ready() -> void:
 
 func _setup_environment() -> void:
 	var env := Environment.new()
+	# Warm dusk sky (deliberately NOT blue) so it's obvious the 3D scene renders,
+	# and bright enough that the whole town reads clearly.
 	env.background_mode = Environment.BG_COLOR
-	env.background_color = Color(0.03, 0.04, 0.06)
+	env.background_color = Color(0.22, 0.16, 0.14)
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	env.ambient_light_color = Color(0.15, 0.19, 0.25)
-	env.ambient_light_energy = 0.45
+	env.ambient_light_color = Color(0.45, 0.42, 0.40)
+	env.ambient_light_energy = 1.1
 	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 	env.tonemap_white = 6.0
 	env.fog_enabled = true
-	env.fog_light_color = Color(0.10, 0.15, 0.20)
-	env.fog_density = 0.018
+	env.fog_light_color = Color(0.28, 0.20, 0.16)
+	env.fog_density = 0.008
 	env.fog_sky_affect = 0.0
 	env.glow_enabled = true
 	env.glow_intensity = 0.9

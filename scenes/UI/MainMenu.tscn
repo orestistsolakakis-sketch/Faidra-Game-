@@ -73,5 +73,5 @@ offset_bottom = -20.0
 grow_horizontal = 2
 grow_vertical = 0
 theme_override_font_sizes/font_size = 20
-text = "BUILD 12  —  WebGL renderer fix (the world should render now)"
+text = "BUILD 13  —  bright warm lighting (blue = not loaded, warm = it works)"
 horizontal_alignment = 1
