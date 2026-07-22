@@ -73,5 +73,5 @@ offset_bottom = -20.0
 grow_horizontal = 2
 grow_vertical = 0
 theme_override_font_sizes/font_size = 20
-text = "BUILD 10  —  no-cache + city grid + underground railway"
+text = "BUILD 11  —  real town: roads, neighborhoods, parks, crowds"
 horizontal_alignment = 1
