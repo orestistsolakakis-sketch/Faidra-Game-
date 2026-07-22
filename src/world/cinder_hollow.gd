@@ -54,7 +54,7 @@ func _setup_environment() -> void:
 	# Warm dusk sky (deliberately NOT blue) so it's obvious the 3D scene renders,
 	# and bright enough that the whole town reads clearly.
 	env.background_mode = Environment.BG_COLOR
-	env.background_color = Color(0, 0, 0)  # BUILD 21 diagnostic: black sky (drawn without mesh shaders)
+	env.background_color = Color(0.12, 0.12, 0.16)
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	env.ambient_light_color = Color(0.45, 0.42, 0.40)
 	env.ambient_light_energy = 1.1
@@ -568,17 +568,15 @@ func _add(mesh: Mesh, pos: Vector3, mat: StandardMaterial3D) -> void:
 
 func _mat(c: Color) -> StandardMaterial3D:
 	var m := StandardMaterial3D.new()
-	# BUILD 21 diagnostic: bright green, unshaded. On a black sky this is unmistakable.
-	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	m.albedo_color = Color(0.1, 0.95, 0.35)
+	m.albedo_color = c
+	m.roughness = 0.9
 	return m
 
 
 func _emissive(c: Color, energy: float) -> StandardMaterial3D:
 	var m := StandardMaterial3D.new()
-	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	m.albedo_color = Color(0.1, 0.95, 0.35)  # BUILD 21 diagnostic: green
+	m.albedo_color = c
 	m.emission_enabled = true
-	m.emission = Color(0.1, 0.95, 0.35)
+	m.emission = c
 	m.emission_energy_multiplier = energy
 	return m

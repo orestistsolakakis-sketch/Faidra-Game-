@@ -73,5 +73,5 @@ offset_bottom = -20.0
 grow_horizontal = 2
 grow_vertical = 0
 theme_override_font_sizes/font_size = 20
-text = "BUILD 21  —  black sky + green shapes (is bg black? shapes green or pink?)"
+text = "BUILD 22  —  real game (try on your phone; PC needs a GPU driver update)"
 horizontal_alignment = 1
