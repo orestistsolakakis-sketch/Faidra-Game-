@@ -71,6 +71,8 @@ func _interact(which: Node) -> void:
 			_start_scene(CinderHollowScenes.RENNICK_MARKET_ID)
 		"resident_dara":
 			_start_scene(CinderHollowScenes.DARA_ID)
+		"rail_station":
+			SceneLoader.transition_to("res://scenes/World/CinderUnderground.tscn", GameState.PLAYING)
 		"neighbor":
 			_hud.push_toast("", "A wet, rattling cough behind the door. It started three days ago.")
 		"lift":

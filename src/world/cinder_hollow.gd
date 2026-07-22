@@ -102,6 +102,10 @@ func _build_district() -> void:
 	# --- Residential quarter (a courtyard off the main street) ---
 	_residential(Vector3(-13, 0, -2))
 
+	# --- Expand into a city grid: avenues, cross-streets, blocks, crowds ---
+	_expand_city()
+	_rail_station(Vector3(24, 0, -8))
+
 	# --- Ambient life: spinning fans and drifting steam ---
 	_fan(Vector3(-6.7, 4.5, 6), Vector3(0, 0, 1))
 	_fan(Vector3(6.7, 5.5, -8), Vector3(0, 0, 1))
@@ -166,6 +170,68 @@ func _steam(pos: Vector3) -> void:
 
 	add_child(p)
 	p.emitting = true
+
+
+func _expand_city() -> void:
+	# Cross-streets (roads running along X) at a few Z lines, lined with buildings.
+	for z in [8.0, -16.0, 24.0]:
+		_cross_street(z)
+	# Avenues (roads running along Z) to the east and west, lined with buildings.
+	for x in [-22.0, 22.0]:
+		_avenue(x)
+	# Fill the outer blocks with clustered buildings (keep the main street clear).
+	_fill_blocks()
+	# A city crowd — pedestrians scattered through the wider district.
+	for _i in 12:
+		var px := _rng.randf_range(-34.0, 34.0)
+		var pz := _rng.randf_range(-34.0, 30.0)
+		if absf(px) < 7.0:
+			continue
+		_npc(Vector3(px, 0, pz), Color(_rng.randf_range(0.22, 0.42), _rng.randf_range(0.2, 0.36), _rng.randf_range(0.22, 0.42)))
+
+
+func _cross_street(z: float) -> void:
+	_box(Vector3(78, 0.06, 7), Vector3(0, 0.02, z), _mat(Color(0.08, 0.09, 0.11)))  # road surface
+	for xi in range(-34, 35, 8):
+		if absi(xi) < 6:
+			continue
+		_building(Vector3(xi, 0, z + 6.5))
+		_building(Vector3(xi, 0, z - 6.5))
+	_lamp(Vector3(-11, 0, z + 3.4))
+	_lamp(Vector3(11, 0, z - 3.4))
+
+
+func _avenue(x: float) -> void:
+	_box(Vector3(7, 0.06, 78), Vector3(x, 0.02, 0), _mat(Color(0.08, 0.09, 0.11)))
+	for zi in range(-34, 35, 8):
+		_building(Vector3(x + 6.5, 0, zi))
+		_building(Vector3(x - 6.5, 0, zi))
+	_lamp(Vector3(x + 3.4, 0, -12))
+	_lamp(Vector3(x - 3.4, 0, 12))
+
+
+func _fill_blocks() -> void:
+	for bx in [-32.0, -12.0, 12.0, 32.0]:
+		for bz in [-30.0, -8.0, 16.0, 30.0]:
+			if absf(bx) < 10.0 and absf(bz) < 20.0:
+				continue  # leave the central playable corridor alone
+			for _k in 2:
+				var p := Vector3(bx + _rng.randf_range(-5.0, 5.0), 0, bz + _rng.randf_range(-5.0, 5.0))
+				if absf(p.x) < 7.0:
+					continue
+				_building(p)
+
+
+func _rail_station(pos: Vector3) -> void:
+	_box(Vector3(10, 7, 8), pos + Vector3(0, 3.5, 0), _mat(Color(0.16, 0.15, 0.17)))
+	_box(Vector3(3, 4, 0.5), pos + Vector3(0, 2, -4.1), _mat(Color(0.03, 0.03, 0.05)))   # dark entrance mouth
+	_box(Vector3(6.5, 1, 0.3), pos + Vector3(0, 5.6, -4.1), _emissive(TEAL, 1.6))         # glowing sign
+	var glow := OmniLight3D.new()
+	glow.light_color = TEAL
+	glow.light_energy = 2.0
+	glow.omni_range = 7.5
+	glow.position = pos + Vector3(0, 1.6, -3.0)
+	add_child(glow)
 
 
 func _building(base: Vector3) -> void:

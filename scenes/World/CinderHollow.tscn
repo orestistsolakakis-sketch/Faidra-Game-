@@ -9,7 +9,7 @@
 [ext_resource type="Script" path="res://src/interaction/interactable.gd" id="7_inter"]
 
 [sub_resource type="BoxShape3D" id="FloorShape"]
-size = Vector3(40, 1, 90)
+size = Vector3(120, 1, 130)
 
 [sub_resource type="CapsuleShape3D" id="CapShape"]
 radius = 0.4
@@ -34,7 +34,7 @@ shadow_enabled = true
 script = ExtResource("5_env")
 
 [node name="Floor" type="StaticBody3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -3)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, -10)
 
 [node name="Collision" type="CollisionShape3D" parent="Floor"]
 shape = SubResource("FloorShape")
@@ -52,7 +52,7 @@ shape = SubResource("CapShape")
 script = ExtResource("4_model")
 model_path = "res://assets/models/arlen.obj"
 tint = Color(0.8, 0.78, 0.82, 1)
-yaw_offset_deg = 0.0
+yaw_offset_deg = 180.0
 
 [node name="CameraPivot" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, 10)
@@ -138,6 +138,16 @@ verb = "Talk"
 
 [node name="Shape" type="CollisionShape3D" parent="ResidentDara"]
 shape = SubResource("SphereSmall")
+
+[node name="RailStation" type="Area3D" parent="." groups=["interactable"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 24, 1, -4)
+script = ExtResource("7_inter")
+id = "rail_station"
+label = "Underground Rail Station"
+verb = "Descend"
+
+[node name="Shape" type="CollisionShape3D" parent="RailStation"]
+shape = SubResource("SphereBig")
 
 [node name="Hud" type="CanvasLayer" parent="."]
 unique_name_in_owner = true
