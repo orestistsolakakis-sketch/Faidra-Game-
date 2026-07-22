@@ -73,5 +73,5 @@ offset_bottom = -20.0
 grow_horizontal = 2
 grow_vertical = 0
 theme_override_font_sizes/font_size = 20
-text = "BUILD 18  —  unshaded materials so the town renders on your GPU"
+text = "BUILD 19  —  everything forced GREEN (green = works, pink = GPU shader fail)"
 horizontal_alignment = 1
