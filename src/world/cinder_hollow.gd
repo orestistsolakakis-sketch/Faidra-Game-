@@ -91,6 +91,14 @@ func _build_district() -> void:
 	# Bram — Arlen's friend — stands near his interaction spot, in a warmer coat.
 	_npc(Vector3(2.2, 0, 4.2), Color(0.5, 0.34, 0.2))
 
+	# --- Market: extra stalls, braziers, and the two merchants you can talk to ---
+	_stall(Vector3(-4.5, 0, -1))
+	_stall(Vector3(4.5, 0, 1))
+	_brazier(Vector3(-2.6, 0, -1))
+	_brazier(Vector3(2.6, 0, -5))
+	_npc(Vector3(-4.2, 0, 1.5), Color(0.55, 0.4, 0.22))   # Fen, the steam-bread seller
+	_npc(Vector3(4.2, 0, -3.5), Color(0.4, 0.36, 0.3))    # Old Rennick, the scrap dealer
+
 	# --- Ambient life: spinning fans and drifting steam ---
 	_fan(Vector3(-6.7, 4.5, 6), Vector3(0, 0, 1))
 	_fan(Vector3(6.7, 5.5, -8), Vector3(0, 0, 1))
@@ -202,6 +210,20 @@ func _stall(pos: Vector3) -> void:
 		_box(Vector3(0.1, 2, 0.1), pos + Vector3(x, 1, 0), _mat(COPPER))
 	_box(Vector3(2.2, 0.1, 1.4), pos + Vector3(0, 2, 0), _mat(Color(0.35, 0.15, 0.15)))  # awning
 	_box(Vector3(2.0, 0.8, 1.0), pos + Vector3(0, 0.9, 0), _mat(Color(0.2, 0.16, 0.12)))  # counter
+
+
+func _brazier(pos: Vector3) -> void:
+	_box(Vector3(0.5, 0.5, 0.5), pos + Vector3(0, 0.25, 0), _mat(STONE))
+	var fire := SphereMesh.new()
+	fire.radius = 0.22
+	fire.height = 0.44
+	_add(fire, pos + Vector3(0, 0.6, 0), _emissive(FORGE, 3.2))
+	var light := OmniLight3D.new()
+	light.light_color = FORGE
+	light.light_energy = 2.6
+	light.omni_range = 6.5
+	light.position = pos + Vector3(0, 0.7, 0)
+	add_child(light)
 
 
 func _lamp(pos: Vector3) -> void:

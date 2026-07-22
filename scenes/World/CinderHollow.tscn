@@ -109,6 +109,26 @@ verb = "Inspect"
 [node name="Shape" type="CollisionShape3D" parent="Lift"]
 shape = SubResource("SphereBig")
 
+[node name="MerchantFen" type="Area3D" parent="." groups=["interactable"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.2, 1, 1.5)
+script = ExtResource("7_inter")
+id = "merchant_fen"
+label = "Fen, the steam-bread seller"
+verb = "Talk"
+
+[node name="Shape" type="CollisionShape3D" parent="MerchantFen"]
+shape = SubResource("SphereSmall")
+
+[node name="MerchantRennick" type="Area3D" parent="." groups=["interactable"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.2, 1, -3.5)
+script = ExtResource("7_inter")
+id = "merchant_rennick"
+label = "Old Rennick, the scrap dealer"
+verb = "Talk"
+
+[node name="Shape" type="CollisionShape3D" parent="MerchantRennick"]
+shape = SubResource("SphereSmall")
+
 [node name="Hud" type="CanvasLayer" parent="."]
 unique_name_in_owner = true
 script = ExtResource("6_hud")

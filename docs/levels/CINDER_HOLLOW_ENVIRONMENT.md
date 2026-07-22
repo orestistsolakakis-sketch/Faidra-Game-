@@ -8,6 +8,28 @@
 > [`ART_DIRECTION.md`](../ART_DIRECTION.md), and the interface in
 > [`UI_UX_BIBLE.md`](../UI_UX_BIBLE.md).
 
+## Signage, businesses & flavor (from reference concept art — canon)
+
+The district reads through its hand-painted signs. Canonical establishments and
+text seen on the walls:
+
+- **Hawkins Ironworks and Machinery** — a working iron/machine shop.
+- **Coal & Cinder Supply Co.** — fuel supplier (fuel = coal and "cinder").
+- **Cinder Hollow Thrift Lodgings** — *"Pay First. No Questions."*
+- **Rooms to Let by the Night** — *"Warm Beds · Clean Linen · 2 Cinders."*
+- **The Drain Sector** — a lower/older quarter the street descends toward
+  (archway signed "DRAIN SECTOR"); tied to the tunnels and the dead lift.
+- District motto painted large: **"We keep Cinder Hollow running."**
+- Anti-crown graffiti: **"Kaufstein doesn't care about us."**
+
+**Currency:** the **Cinder** (small coin; prices quoted in cinders). Fuel, money,
+and the district's name all trace to coal-cinder — the Hollow literally runs on
+what the city above burns and discards.
+
+**Palette confirmed by the references:** near-black wet brick and cobbles, warm
+amber lamp/window glow, rust and soot, distant taller city silhouetted in cold
+haze, rain-slick reflective ground, hanging laundry, iron stairs and railings.
+
 ## Reference cluster (feel, never copied)
 
 Dishonored · Arcane's Zaun · Lies of P · FFVII Midgar slums. Take the *lived-in,

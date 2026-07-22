@@ -65,6 +65,10 @@ func _interact(which: Node) -> void:
 				var scene := World.dialogue.get_scene(CinderHollowScenes.BRAM_INTRO_ID)
 				if scene != null:
 					World.dialogue_runner.start(scene)
+		"merchant_fen":
+			_start_scene(CinderHollowScenes.FEN_MARKET_ID)
+		"merchant_rennick":
+			_start_scene(CinderHollowScenes.RENNICK_MARKET_ID)
 		"neighbor":
 			_hud.push_toast("", "A wet, rattling cough behind the door. It started three days ago.")
 		"lift":
@@ -74,6 +78,12 @@ func _interact(which: Node) -> void:
 		_:
 			_hud.push_toast("", "Nothing to do here.")
 	_update_prompt()
+
+
+func _start_scene(scene_id: String) -> void:
+	var scene := World.dialogue.get_scene(scene_id)
+	if scene != null:
+		World.dialogue_runner.start(scene)
 
 
 func _on_interactable_entered(which: Node) -> void:

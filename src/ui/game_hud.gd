@@ -363,6 +363,8 @@ func _display(id: String) -> String:
 		"arlen": return "Arlen"
 		"lysandra": return "Lysandra"
 		"arlen_best_friend": return "Bram"
+		"fen": return "Fen · Steam-bread"
+		"rennick": return "Old Rennick · Scrap"
 		"": return ""
 		_: return id
 
