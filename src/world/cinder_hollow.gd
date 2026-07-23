@@ -50,24 +50,40 @@ func _ready() -> void:
 
 
 func _setup_environment() -> void:
+	# Cinder Hollow at dusk: a cold, smog-choked industrial hollow (Zaun / Dishonored /
+	# Lies of P). Deep blue-black base, cool moonlight ambient, thick haze, and strong
+	# bloom so the warm lamps and the teal/magenta Lifeline glow read as pools of light.
 	var env := Environment.new()
-	# Warm dusk sky (deliberately NOT blue) so it's obvious the 3D scene renders,
-	# and bright enough that the whole town reads clearly.
 	env.background_mode = Environment.BG_COLOR
-	env.background_color = Color(0.12, 0.12, 0.16)
+	env.background_color = Color(0.03, 0.04, 0.07)
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	env.ambient_light_color = Color(0.45, 0.42, 0.40)
-	env.ambient_light_energy = 1.1
-	env.tonemap_mode = Environment.TONE_MAPPER_FILMIC
-	env.tonemap_white = 6.0
+	env.ambient_light_color = Color(0.18, 0.24, 0.34)   # cool moonlight fill
+	env.ambient_light_energy = 0.55
+	env.tonemap_mode = Environment.TONE_MAPPER_ACES
+	env.tonemap_white = 8.0
+	env.tonemap_exposure = 1.05
+
+	# Layered haze: thick enough to fade distant buildings into smog.
 	env.fog_enabled = true
-	env.fog_light_color = Color(0.28, 0.20, 0.16)
-	env.fog_density = 0.008
+	env.fog_light_color = Color(0.10, 0.14, 0.20)
+	env.fog_light_energy = 0.6
+	env.fog_density = 0.022
 	env.fog_sky_affect = 0.0
+
+	# Bloom only on the bright, self-lit sources.
 	env.glow_enabled = true
-	env.glow_intensity = 0.9
-	env.glow_bloom = 0.15
-	env.glow_strength = 1.1
+	env.glow_intensity = 1.1
+	env.glow_bloom = 0.25
+	env.glow_strength = 1.2
+	env.glow_hdr_threshold = 1.0
+	env.glow_blend_mode = Environment.GLOW_BLEND_MODE_SCREEN
+
+	# Grade: crush blacks a touch, cool it down, drop saturation for that grimy film look.
+	env.adjustment_enabled = true
+	env.adjustment_brightness = 1.0
+	env.adjustment_contrast = 1.12
+	env.adjustment_saturation = 0.88
+
 	var we := WorldEnvironment.new()
 	we.environment = env
 	add_child(we)
@@ -119,6 +135,49 @@ func _build_town() -> void:
 	for z in [8.0, 0.0, -8.0, -16.0]:
 		_steam(Vector3(_rng.randf_range(-3.0, 3.0), 0.2, z))
 	_steam(Vector3(0, 0.5, -22))
+	_atmosphere()
+
+
+func _atmosphere() -> void:
+	# Overhead wire-tangle strung down the main street and across the avenues.
+	for z in [12.0, 5.0, -2.0, -9.0, -16.0]:
+		_cable(Vector3(-6.5, 6.2, z), Vector3(6.5, 5.6, z), 1.4)
+	for z in [15.0, -5.0, -20.0]:
+		_cable(Vector3(-6.5, 7.4, z + 1.0), Vector3(6.5, 6.8, z - 1.0), 1.2)
+	_cable(Vector3(-13.5, 6.0, 4.0), Vector3(-7.0, 5.5, -2.0), 1.0)
+	_cable(Vector3(13.5, 6.2, -2.0), Vector3(7.0, 5.6, 4.0), 1.0)
+
+	# Warm string-lights across the market, and glowing shop signs over the street.
+	_string_lights(Vector3(-4.6, 4.8, 2.0), Vector3(4.6, 4.8, -1.0), 9, WARM)
+	_string_lights(Vector3(-4.6, 4.6, -8.0), Vector3(4.6, 4.6, -11.0), 8, WARM)
+	_hanging_sign(Vector3(-6.6, 4.0, 1.0), WARM)
+	_hanging_sign(Vector3(6.6, 3.6, -5.0), TEAL)
+	_hanging_sign(Vector3(-6.6, 4.2, -9.0), MAGENTA)
+
+	# Lifeline conduits climbing the buildings that flank the main street.
+	_conduit(Vector3(-6.9, 0, 6.0), 6.5, TEAL)
+	_conduit(Vector3(6.9, 0, -3.0), 5.5, TEAL)
+	_conduit(Vector3(-6.9, 0, -12.0), 5.0, MAGENTA)
+	_conduit(Vector3(6.9, 0, 10.0), 6.0, TEAL)
+
+	# Rooftop chimneys venting smoke over the district.
+	for cp in [Vector3(-10, 8, 14), Vector3(11, 9, 15), Vector3(-31, 10, 15), Vector3(9, 7, -2)]:
+		_chimney(cp)
+
+	# Puddles catching the lamplight down the wet street.
+	for _i in 14:
+		var px := _rng.randf_range(-5.0, 5.0)
+		var pz := _rng.randf_range(Z_MIN + 4, Z_MAX - 4)
+		_puddle(Vector3(px, 0, pz), _rng.randf_range(0.7, 1.6))
+
+	# Clutter: barrels and crates piled in the market and alleys.
+	for bp in [Vector3(-5.4, 0, -2), Vector3(5.4, 0, 3), Vector3(-5.6, 0, -12), Vector3(9.4, 0, -2)]:
+		_barrel(bp)
+		_barrel(bp + Vector3(0.7, 0, 0.2))
+		_crate(bp + Vector3(-0.1, 0, 0.9), _rng.randf_range(0.6, 0.9))
+	_crate(Vector3(4.8, 0, 5), 0.8)
+	_crate(Vector3(4.8, 0, 5.9), 0.6)
+	_crate(Vector3(-4.9, 0, -6), 0.7)
 
 
 # --------------------------------------------------------------------------
@@ -126,8 +185,8 @@ func _build_town() -> void:
 # --------------------------------------------------------------------------
 
 func _ground() -> void:
-	# One large earthen plane under the whole town so gaps aren't void.
-	_box(Vector3(X_MAX - X_MIN + 20, 0.2, Z_MAX - Z_MIN + 20), Vector3(0, -0.1, (Z_MAX + Z_MIN) * 0.5), _mat(GROUND))
+	# One large wet earthen plane under the whole town so gaps aren't void.
+	_box(Vector3(X_MAX - X_MIN + 20, 0.2, Z_MAX - Z_MIN + 20), Vector3(0, -0.1, (Z_MAX + Z_MIN) * 0.5), _wet(GROUND))
 
 
 func _road_network() -> void:
@@ -146,7 +205,7 @@ func _road_network() -> void:
 func _road_v(x: float) -> void:
 	var length := Z_MAX - Z_MIN
 	var mid := (Z_MAX + Z_MIN) * 0.5
-	_box(Vector3(ROAD_W, 0.06, length), Vector3(x, 0.02, mid), _mat(ROAD))
+	_box(Vector3(ROAD_W, 0.06, length), Vector3(x, 0.02, mid), _wet(ROAD))
 	# Dashed centre line.
 	for zi in range(int(Z_MIN) + 2, int(Z_MAX) - 1, 4):
 		_box(Vector3(0.18, 0.02, 1.6), Vector3(x, 0.06, float(zi)), _mat(LINE))
@@ -157,7 +216,7 @@ func _road_v(x: float) -> void:
 
 func _road_h(z: float) -> void:
 	var length := X_MAX - X_MIN
-	_box(Vector3(length, 0.06, ROAD_W), Vector3(0, 0.02, z), _mat(ROAD))
+	_box(Vector3(length, 0.06, ROAD_W), Vector3(0, 0.02, z), _wet(ROAD))
 	for xi in range(int(X_MIN) + 2, int(X_MAX) - 1, 4):
 		_box(Vector3(1.6, 0.02, 0.18), Vector3(float(xi), 0.06, z), _mat(LINE))
 	_box(Vector3(length, 0.16, 1.6), Vector3(0, 0.08, z - ROAD_W * 0.5 - 0.8), _mat(WALK))
@@ -301,24 +360,55 @@ func _sick_neighbor(pos: Vector3) -> void:
 # --------------------------------------------------------------------------
 
 func _shop(base: Vector3, footprint: Vector2, height: float) -> void:
-	_box(Vector3(footprint.x, height, footprint.y), base + Vector3(0, height * 0.5, 0), _mat(BRICK.lerp(STONE, _rng.randf())))
-	# A lit ground-floor shopfront facing the street (-Z).
-	_box(Vector3(footprint.x * 0.7, 1.6, 0.2), base + Vector3(0, 1.1, -footprint.y * 0.5 - 0.1), _emissive(WARM, 1.8))
-	# Upper-floor windows.
+	var w := footprint.x
+	var d := footprint.y
+	var wall := BRICK.lerp(STONE, _rng.randf())
+	var front := -d * 0.5
+	# Main mass + a darker stone plinth and a capping cornice so it reads as built.
+	_box(Vector3(w, height, d), base + Vector3(0, height * 0.5, 0), _mat(wall))
+	_box(Vector3(w + 0.3, 0.7, d + 0.3), base + Vector3(0, 0.35, 0), _mat(wall.darkened(0.45)))       # plinth
+	_box(Vector3(w + 0.4, 0.35, d + 0.4), base + Vector3(0, height + 0.1, 0), _mat(wall.darkened(0.3)))  # cornice
+	# A warm, lit shopfront with a frame and an awning over the door.
+	_box(Vector3(w * 0.75, 1.7, 0.12), base + Vector3(0, 1.15, front - 0.06), _emissive(WARM, 1.9))
+	_box(Vector3(w * 0.8, 0.2, 0.2), base + Vector3(0, 2.1, front - 0.1), _mat(wall.darkened(0.4)))     # frame head
+	_box(Vector3(w * 0.55, 0.14, 1.0), base + Vector3(0, 2.0, front - 0.55), _mat(Color(0.32, 0.14, 0.14)))  # awning
+	# Upper floors: a divider ledge and framed, lit windows.
 	var floors := int((height - 2.0) / 3.0)
 	for f in range(floors):
+		var fy := 3.0 + f * 3.0
+		_box(Vector3(w + 0.15, 0.18, d + 0.15), base + Vector3(0, fy - 0.9, 0), _mat(wall.darkened(0.25)))
 		for wx in [-1.0, 1.0]:
-			_box(Vector3(0.6, 0.7, 0.15), base + Vector3(wx * footprint.x * 0.25, 3.0 + f * 3.0, -footprint.y * 0.5 - 0.05), _emissive(WARM, 1.6))
+			var lit := _rng.randf() > 0.35
+			var wpos := base + Vector3(wx * w * 0.26, fy, front - 0.04)
+			_box(Vector3(0.72, 0.82, 0.1), wpos, _mat(wall.darkened(0.5)))                    # frame
+			_box(Vector3(0.52, 0.62, 0.12), wpos + Vector3(0, 0, -0.03), _emissive(WARM, 1.6) if lit else _mat(Color(0.05, 0.06, 0.08)))
 
 
 func _small_home(pos: Vector3) -> void:
-	# A single-storey home with a pitched-ish roof cap and a lit window.
+	# A single-storey home with a pitched roof, framed window, doorstep and a stovepipe.
 	var w := _rng.randf_range(3.5, 5.0)
 	var d := _rng.randf_range(3.5, 4.5)
-	_box(Vector3(w, 3.0, d), pos + Vector3(0, 1.5, 0), _mat(BRICK.lerp(COPPER, _rng.randf() * 0.5)))
-	_box(Vector3(w + 0.4, 0.5, d + 0.4), pos + Vector3(0, 3.2, 0), _mat(Color(0.12, 0.10, 0.09)))  # roof cap
-	_box(Vector3(0.8, 1.6, 0.15), pos + Vector3(0, 1.0, -d * 0.5 - 0.08), _mat(Color(0.08, 0.06, 0.05)))  # door
-	_box(Vector3(0.6, 0.6, 0.1), pos + Vector3(w * 0.28, 1.6, -d * 0.5 - 0.05), _emissive(WARM, 1.6))       # window
+	var wall := BRICK.lerp(COPPER, _rng.randf() * 0.5)
+	var front := -d * 0.5
+	_box(Vector3(w, 3.0, d), pos + Vector3(0, 1.5, 0), _mat(wall))
+	# A simple gabled roof from two slanted slabs.
+	for side in [-1.0, 1.0]:
+		var slab := MeshInstance3D.new()
+		var bm := BoxMesh.new()
+		bm.size = Vector3(w + 0.5, 0.18, d * 0.62)
+		slab.mesh = bm
+		slab.material_override = _mat(Color(0.10, 0.09, 0.08))
+		slab.position = pos + Vector3(0, 3.35, side * d * 0.25)
+		slab.rotation.x = side * 0.5
+		add_child(slab)
+	_box(Vector3(0.85, 1.65, 0.12), pos + Vector3(0, 1.02, front - 0.06), _mat(Color(0.07, 0.05, 0.04)))   # door
+	_box(Vector3(1.1, 0.12, 0.6), pos + Vector3(0, 0.2, front - 0.35), _mat(STONE.darkened(0.2)))          # step
+	var wpos := pos + Vector3(w * 0.28, 1.6, front - 0.04)
+	_box(Vector3(0.7, 0.7, 0.1), wpos, _mat(wall.darkened(0.5)))                                            # frame
+	_box(Vector3(0.5, 0.5, 0.12), wpos + Vector3(0, 0, -0.03), _emissive(WARM, 1.6))                        # lit pane
+	if _rng.randf() > 0.4:
+		_box(Vector3(0.3, 1.0, 0.3), pos + Vector3(w * 0.3, 3.4, d * 0.2), _metal(Color(0.07, 0.07, 0.08)))
+		_smoke(pos + Vector3(w * 0.3, 4.0, d * 0.2))
 
 
 func _tree(pos: Vector3) -> void:
@@ -460,30 +550,42 @@ func _stall(pos: Vector3) -> void:
 
 
 func _brazier(pos: Vector3) -> void:
-	_box(Vector3(0.5, 0.5, 0.5), pos + Vector3(0, 0.25, 0), _mat(STONE))
+	# An iron fire-basket on legs with a hot coal glow and drifting embers.
+	_box(Vector3(0.5, 0.4, 0.5), pos + Vector3(0, 0.55, 0), _metal(Color(0.10, 0.09, 0.09)))
+	for lx in [-0.18, 0.18]:
+		for lz in [-0.18, 0.18]:
+			_box(Vector3(0.05, 0.55, 0.05), pos + Vector3(lx, 0.28, lz), _metal(Color(0.08, 0.07, 0.07)))
 	var fire := SphereMesh.new()
-	fire.radius = 0.22
-	fire.height = 0.44
-	_add(fire, pos + Vector3(0, 0.6, 0), _emissive(FORGE, 3.2))
+	fire.radius = 0.24
+	fire.height = 0.4
+	_add(fire, pos + Vector3(0, 0.7, 0), _emissive(FORGE, 3.6))
+	_embers(pos + Vector3(0, 0.75, 0))
 	var light := OmniLight3D.new()
 	light.light_color = FORGE
-	light.light_energy = 2.6
-	light.omni_range = 6.5
-	light.position = pos + Vector3(0, 0.7, 0)
+	light.light_energy = 2.8
+	light.omni_range = 7.0
+	light.light_specular = 1.4
+	light.position = pos + Vector3(0, 0.8, 0)
 	add_child(light)
 
 
 func _lamp(pos: Vector3) -> void:
-	_box(Vector3(0.12, 3.0, 0.12), pos + Vector3(0, 1.5, 0), _mat(STONE))
-	var bulb := SphereMesh.new()
-	bulb.radius = 0.15
-	bulb.height = 0.3
-	_add(bulb, pos + Vector3(0, 3.0, 0), _emissive(WARM, 3.0))
+	# A wrought-iron gas lamp: fluted post, cross-arm and a glass lantern head that
+	# throws a warm pool onto the wet street.
+	_box(Vector3(0.28, 0.28, 0.28), pos + Vector3(0, 0.14, 0), _metal(Color(0.09, 0.09, 0.10)))  # base
+	_box(Vector3(0.13, 3.4, 0.13), pos + Vector3(0, 1.7, 0), _metal(Color(0.11, 0.11, 0.12)))     # post
+	_box(Vector3(0.5, 0.08, 0.08), pos + Vector3(0, 3.35, 0), _metal(Color(0.11, 0.11, 0.12)))    # cross-arm
+	# Lantern housing (dark frame) + glowing glass core.
+	_box(Vector3(0.34, 0.5, 0.34), pos + Vector3(0, 3.1, 0), _metal(Color(0.08, 0.08, 0.09)))
+	var glass := BoxMesh.new()
+	glass.size = Vector3(0.22, 0.38, 0.22)
+	_add(glass, pos + Vector3(0, 3.1, 0), _emissive(WARM, 3.2))
 	var light := OmniLight3D.new()
 	light.light_color = WARM
-	light.light_energy = 2.0
-	light.omni_range = 8.0
-	light.position = pos + Vector3(0, 3.0, 0)
+	light.light_energy = 2.2
+	light.omni_range = 8.5
+	light.light_specular = 1.6   # streaks across wet ground
+	light.position = pos + Vector3(0, 3.1, 0)
 	add_child(light)
 
 
@@ -544,6 +646,131 @@ func _steam(pos: Vector3) -> void:
 	p.emitting = true
 
 
+# --- Atmosphere props ------------------------------------------------------
+
+func _plume(pos: Vector3, col: Color, emissive: bool, amount: int, size: float, rise: float, life: float) -> void:
+	var p := GPUParticles3D.new()
+	p.amount = amount
+	p.lifetime = life
+	p.position = pos
+	p.local_coords = false
+	var mat := ParticleProcessMaterial.new()
+	mat.direction = Vector3(0, 1, 0)
+	mat.spread = 18.0
+	mat.initial_velocity_min = rise * 0.6
+	mat.initial_velocity_max = rise
+	mat.gravity = Vector3(0.2, rise * 0.3, 0.0)
+	mat.scale_min = size * 0.5
+	mat.scale_max = size
+	p.process_material = mat
+	var quad := QuadMesh.new()
+	quad.size = Vector2(1, 1)
+	var qmat := StandardMaterial3D.new()
+	qmat.albedo_color = col
+	qmat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	qmat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	qmat.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+	if emissive:
+		qmat.emission_enabled = true
+		qmat.emission = col
+		qmat.emission_energy_multiplier = 3.0
+	quad.material = qmat
+	p.draw_pass_1 = quad
+	add_child(p)
+	p.emitting = true
+
+
+func _embers(pos: Vector3) -> void:
+	_plume(pos, Color(1.0, 0.55, 0.2, 0.9), true, 14, 0.09, 1.4, 2.0)
+
+
+func _smoke(pos: Vector3) -> void:
+	_plume(pos, Color(0.10, 0.10, 0.12, 0.16), false, 16, 2.2, 1.1, 4.0)
+
+
+func _chimney(pos: Vector3) -> void:
+	_box(Vector3(0.45, 1.3, 0.45), pos + Vector3(0, 0.65, 0), _metal(Color(0.06, 0.06, 0.07)))
+	_box(Vector3(0.55, 0.15, 0.55), pos + Vector3(0, 1.35, 0), _metal(Color(0.05, 0.05, 0.06)))
+	_smoke(pos + Vector3(0, 1.5, 0))
+
+
+func _cable(a: Vector3, b: Vector3, sag: float) -> void:
+	# A drooping catenary between two anchor points — the Zaun wire-tangle look.
+	var segs := 7
+	var prev := a
+	for i in range(1, segs + 1):
+		var t := float(i) / segs
+		var p := a.lerp(b, t)
+		p.y -= sag * sin(t * PI)
+		_cable_seg(prev, p)
+		prev = p
+
+
+func _cable_seg(p0: Vector3, p1: Vector3) -> void:
+	var d := p1 - p0
+	var seg_len := d.length()
+	if seg_len < 0.01:
+		return
+	var mi := MeshInstance3D.new()
+	var bm := BoxMesh.new()
+	bm.size = Vector3(0.05, 0.05, seg_len)
+	mi.mesh = bm
+	mi.material_override = _metal(Color(0.04, 0.04, 0.05))
+	add_child(mi)
+	# Pick an up vector that isn't parallel to the segment (avoids a look_at error).
+	var up := Vector3.UP if absf(d.normalized().dot(Vector3.UP)) < 0.95 else Vector3.FORWARD
+	mi.look_at_from_position((p0 + p1) * 0.5, p1, up)
+
+
+func _conduit(pos: Vector3, height: float, color: Color) -> void:
+	# A Lifeline pipe climbing a wall, its seam glowing teal/magenta.
+	_box(Vector3(0.18, height, 0.18), pos + Vector3(0, height * 0.5, 0), _metal(Color(0.08, 0.08, 0.09)))
+	_box(Vector3(0.07, height, 0.07), pos + Vector3(0.07, height * 0.5, -0.09), _emissive(color, 2.4))
+	for hy in [height * 0.25, height * 0.6, height * 0.9]:
+		_box(Vector3(0.28, 0.07, 0.12), pos + Vector3(0, hy, -0.04), _metal(Color(0.07, 0.07, 0.08)))
+
+
+func _hanging_sign(pos: Vector3, color: Color) -> void:
+	_box(Vector3(0.5, 0.05, 0.05), pos + Vector3(0.25, 0, 0), _metal(Color(0.08, 0.08, 0.09)))
+	_box(Vector3(0.03, 0.32, 0.03), pos + Vector3(0.5, -0.16, 0), _metal(Color(0.08, 0.08, 0.09)))
+	_box(Vector3(0.75, 0.42, 0.08), pos + Vector3(0.5, -0.52, 0), _emissive(color, 1.7))
+
+
+func _string_lights(a: Vector3, b: Vector3, bulbs: int, color: Color) -> void:
+	_cable(a, b, 0.5)
+	for i in range(1, bulbs + 1):
+		var t := float(i) / (bulbs + 1)
+		var p := a.lerp(b, t)
+		p.y -= 0.5 * sin(t * PI) + 0.15
+		var s := SphereMesh.new()
+		s.radius = 0.07
+		s.height = 0.14
+		_add(s, p, _emissive(color, 2.6))
+
+
+func _puddle(pos: Vector3, radius: float) -> void:
+	var cyl := CylinderMesh.new()
+	cyl.top_radius = radius
+	cyl.bottom_radius = radius
+	cyl.height = 0.02
+	_add(cyl, pos + Vector3(0, 0.05, 0), _wet(Color(0.02, 0.03, 0.05)))
+
+
+func _barrel(pos: Vector3) -> void:
+	var cyl := CylinderMesh.new()
+	cyl.top_radius = 0.34
+	cyl.bottom_radius = 0.34
+	cyl.height = 0.9
+	_add(cyl, pos + Vector3(0, 0.45, 0), _metal(Color(0.17, 0.13, 0.09)))
+	_box(Vector3(0.72, 0.06, 0.72), pos + Vector3(0, 0.25, 0), _metal(Color(0.10, 0.08, 0.06)))
+	_box(Vector3(0.72, 0.06, 0.72), pos + Vector3(0, 0.65, 0), _metal(Color(0.10, 0.08, 0.06)))
+
+
+func _crate(pos: Vector3, s: float) -> void:
+	_box(Vector3(s, s, s), pos + Vector3(0, s * 0.5, 0), _mat(Color(0.20, 0.14, 0.09)))
+	_box(Vector3(s * 1.02, 0.05, s * 1.02), pos + Vector3(0, s * 0.5, 0), _mat(Color(0.12, 0.09, 0.06)))
+
+
 # --------------------------------------------------------------------------
 # Low-level helpers
 # --------------------------------------------------------------------------
@@ -567,9 +794,31 @@ func _add(mesh: Mesh, pos: Vector3, mat: StandardMaterial3D) -> void:
 
 
 func _mat(c: Color) -> StandardMaterial3D:
+	# Rough, grimy stone/plaster with a little per-surface variation so flat walls
+	# don't read as uniform. A faint cool rim from ambient does the rest.
 	var m := StandardMaterial3D.new()
 	m.albedo_color = c
-	m.roughness = 0.9
+	m.roughness = _rng.randf_range(0.82, 0.98)
+	m.metallic_specular = 0.35
+	return m
+
+
+func _wet(c: Color) -> StandardMaterial3D:
+	# Wet cobbles / puddled ground: dark and glossy so lamps streak across it.
+	var m := StandardMaterial3D.new()
+	m.albedo_color = c
+	m.roughness = 0.18
+	m.metallic = 0.0
+	m.metallic_specular = 0.9
+	return m
+
+
+func _metal(c: Color) -> StandardMaterial3D:
+	# Rusted iron / copper: lamp posts, pipes, rails, brackets.
+	var m := StandardMaterial3D.new()
+	m.albedo_color = c
+	m.roughness = 0.55
+	m.metallic = 0.8
 	return m
 
 
