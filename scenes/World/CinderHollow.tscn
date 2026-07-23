@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3 uid="uid://blumenfallcinder01"]
+[gd_scene load_steps=12 format=3 uid="uid://blumenfallcinder01"]
 
 [ext_resource type="Script" path="res://src/world/cinder_hollow_root.gd" id="1_root"]
 [ext_resource type="Script" path="res://src/player/player_character.gd" id="2_char"]
@@ -7,8 +7,6 @@
 [ext_resource type="Script" path="res://src/world/cinder_hollow.gd" id="5_env"]
 [ext_resource type="Script" path="res://src/ui/game_hud.gd" id="6_hud"]
 [ext_resource type="Script" path="res://src/interaction/interactable.gd" id="7_inter"]
-[ext_resource type="Material" path="res://assets/materials/town_lit.tres" id="8_lit"]
-[ext_resource type="Material" path="res://assets/materials/town_emissive.tres" id="9_emis"]
 
 [sub_resource type="BoxShape3D" id="FloorShape"]
 size = Vector3(120, 1, 130)
@@ -22,34 +20,6 @@ radius = 3.0
 
 [sub_resource type="SphereShape3D" id="SphereSmall"]
 radius = 2.5
-
-[sub_resource type="StandardMaterial3D" id="TestMat"]
-shading_mode = 0
-albedo_color = Color(1, 0, 1, 1)
-emission_enabled = true
-emission = Color(1, 0, 1, 1)
-
-[sub_resource type="BoxMesh" id="TestMesh"]
-material = SubResource("TestMat")
-size = Vector3(3, 3, 3)
-
-[sub_resource type="BoxMesh" id="PrimerLitMesh"]
-material = ExtResource("8_lit")
-size = Vector3(0.2, 0.2, 0.2)
-
-[sub_resource type="BoxMesh" id="PrimerEmisMesh"]
-material = ExtResource("9_emis")
-size = Vector3(0.2, 0.2, 0.2)
-
-[sub_resource type="StandardMaterial3D" id="BlueLitMat"]
-albedo_color = Color(0.2, 0.4, 1, 1)
-emission_enabled = true
-emission = Color(0.2, 0.4, 1, 1)
-emission_energy_multiplier = 1.5
-
-[sub_resource type="BoxMesh" id="BlueLitMesh"]
-material = SubResource("BlueLitMat")
-size = Vector3(3, 3, 3)
 
 [node name="CinderHollow" type="Node3D"]
 script = ExtResource("1_root")
@@ -178,22 +148,6 @@ verb = "Descend"
 
 [node name="Shape" type="CollisionShape3D" parent="RailStation"]
 shape = SubResource("SphereBig")
-
-[node name="BakedCube" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 3)
-mesh = SubResource("TestMesh")
-
-[node name="PrimerLit" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 6)
-mesh = SubResource("PrimerLitMesh")
-
-[node name="PrimerEmis" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.4, 0.5, 6)
-mesh = SubResource("PrimerEmisMesh")
-
-[node name="BakedBlue" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 2, 3)
-mesh = SubResource("BlueLitMesh")
 
 [node name="Hud" type="CanvasLayer" parent="."]
 unique_name_in_owner = true

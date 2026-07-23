@@ -100,19 +100,17 @@ func _add(mesh: Mesh, pos: Vector3, mat: StandardMaterial3D) -> void:
 	add_child(mi)
 
 
-const LIT_MAT := preload("res://assets/materials/town_lit.tres")
-const EMIS_MAT := preload("res://assets/materials/town_emissive.tres")
-
-
 func _mat(c: Color) -> StandardMaterial3D:
-	var m: StandardMaterial3D = LIT_MAT.duplicate()
+	var m := StandardMaterial3D.new()
 	m.albedo_color = c
+	m.roughness = 0.9
 	return m
 
 
 func _emissive(c: Color, energy: float) -> StandardMaterial3D:
-	var m: StandardMaterial3D = EMIS_MAT.duplicate()
+	var m := StandardMaterial3D.new()
 	m.albedo_color = c
+	m.emission_enabled = true
 	m.emission = c
 	m.emission_energy_multiplier = energy
 	return m

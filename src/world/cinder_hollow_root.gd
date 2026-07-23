@@ -27,19 +27,6 @@ func _ready() -> void:
 	_hud.set_objective("Find out what's making the Hollow sick.")
 	_hud.show_title("CINDER HOLLOW", "The lowest district of the capital. Built on the bones of the old world.")
 
-	_report_diag()
-
-
-func _report_diag() -> void:
-	# Reliable channel: the 2D HUD always renders. Report how many town meshes were
-	# actually created, so we know if the town is built (render issue) or not (crash).
-	await get_tree().create_timer(1.5).timeout
-	var district := get_node_or_null("District")
-	var meshes := 0
-	if district != null:
-		meshes = district.find_children("*", "MeshInstance3D", true, false).size()
-	_hud.set_objective("DIAG: town meshes built = %d" % meshes)
-
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not (event is InputEventKey and event.pressed):

@@ -13,11 +13,6 @@ const Blockout := preload("res://src/player/character_blockout.gd")
 const Wanderer := preload("res://src/world/npc_wanderer.gd")
 const Spinner := preload("res://src/world/spinner.gd")
 
-# Preloaded material resources: their shaders are compiled into the export, so
-# runtime meshes render on web (runtime-BUILT materials don't compile in-browser).
-const LIT_MAT := preload("res://assets/materials/town_lit.tres")
-const EMIS_MAT := preload("res://assets/materials/town_emissive.tres")
-
 const WARM := Color(1.0, 0.72, 0.38)
 const FORGE := Color(1.0, 0.5, 0.2)
 const TEAL := Color(0.31, 0.84, 0.76)
@@ -51,21 +46,7 @@ const ROAD_W := 6.0
 func _ready() -> void:
 	_rng.seed = 71
 	_setup_environment()
-	# Defer to after the first frame: on web, meshes added during _ready (before the
-	# renderer is fully live) can fail to register. Building post-frame may fix it.
-	await get_tree().process_frame
-	_diag_cube(Vector3(-4, 2, 3), Color(0, 1, 0))    # green: runtime mesh, added post-frame
 	_build_town()
-
-
-func _diag_cube(pos: Vector3, col: Color) -> void:
-	var mi := MeshInstance3D.new()
-	var bm := BoxMesh.new()
-	bm.size = Vector3(3, 3, 3)
-	mi.mesh = bm
-	mi.material_override = _mat(col)  # unshaded path — should persist like the baked cube
-	mi.position = pos
-	add_child(mi)
 
 
 func _setup_environment() -> void:
@@ -585,12 +566,17 @@ func _add(mesh: Mesh, pos: Vector3, mat: StandardMaterial3D) -> void:
 	add_child(mi)
 
 
-func _mat(_c: Color) -> StandardMaterial3D:
-	# TEST (BUILD 29): return the SHARED baked material resource with no duplication
-	# or modification. If the town now persists, code-created materials were the bug.
-	return EMIS_MAT
+func _mat(c: Color) -> StandardMaterial3D:
+	var m := StandardMaterial3D.new()
+	m.albedo_color = c
+	m.roughness = 0.9
+	return m
 
 
-func _emissive(_c: Color, _energy: float) -> StandardMaterial3D:
-	# TEST (BUILD 29): shared baked resource, no duplication.
-	return EMIS_MAT
+func _emissive(c: Color, energy: float) -> StandardMaterial3D:
+	var m := StandardMaterial3D.new()
+	m.albedo_color = c
+	m.emission_enabled = true
+	m.emission = c
+	m.emission_energy_multiplier = energy
+	return m
