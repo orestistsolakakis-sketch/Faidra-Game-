@@ -214,6 +214,16 @@ verb = "Examine / Repair"
 [node name="Shape" type="CollisionShape3D" parent="WorkshopGenerator"]
 shape = SubResource("SphereBig")
 
+[node name="HospitalDoor" type="Area3D" parent="." groups=["interactable"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -19.6, 1, 4)
+script = ExtResource("7_inter")
+id = "hospital_door"
+label = "The Cinder Hollow Hospital"
+verb = "Enter"
+
+[node name="Shape" type="CollisionShape3D" parent="HospitalDoor"]
+shape = SubResource("SphereBig")
+
 [node name="Hud" type="CanvasLayer" parent="."]
 unique_name_in_owner = true
 script = ExtResource("6_hud")

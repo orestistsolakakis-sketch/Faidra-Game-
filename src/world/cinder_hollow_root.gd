@@ -73,6 +73,8 @@ func _interact(which: Node) -> void:
 			SceneLoader.transition_to("res://scenes/World/CopperKettle.tscn", GameState.PLAYING)
 		"home_door":
 			SceneLoader.transition_to("res://scenes/World/CinderHome.tscn", GameState.PLAYING)
+		"hospital_door":
+			SceneLoader.transition_to("res://scenes/World/Hospital.tscn", GameState.PLAYING)
 		"steam_lift":
 			_repair_steam_lift()
 		"workshop_generator":

@@ -21,6 +21,7 @@ const STONE := Color(0.14, 0.16, 0.20)
 const BRICK := Color(0.22, 0.16, 0.13)
 const COPPER := Color(0.45, 0.32, 0.22)
 const WOOD_COL := Color(0.22, 0.15, 0.09)
+const COLD_WIN := Color(0.55, 0.70, 0.85)
 const GROUND := Color(0.06, 0.07, 0.06)
 const ROAD := Color(0.07, 0.08, 0.10)
 const WALK := Color(0.20, 0.21, 0.24)
@@ -244,6 +245,7 @@ func _landmarks() -> void:
 	_heart_machine(Vector3(31, 0, -14))   # the great glowing engine by the station
 	_gasholder(Vector3(40, 0, 4))
 	_steam_lift(Vector3(24, 0, 6))        # repairable landmark (see CinderHollow.tscn)
+	_hospital(Vector3(-27, 0, 4))         # enterable — Hospital.tscn
 
 
 func _factory_tower(base: Vector3) -> void:
@@ -273,6 +275,32 @@ func _factory_tower(base: Vector3) -> void:
 	# Big exterior pipes running down the face.
 	for px in [-6.5, 6.5]:
 		_box(Vector3(1.1, 30, 1.1), base + Vector3(px, 15, -7.2), _metal(COPPER.darkened(0.3)))
+
+
+func _hospital(base: Vector3) -> void:
+	# The district hospital — a heavy old royal building gone shabby: stone mass,
+	# broken upper windows, copper heating pipes, a faded medical cross, and one warm
+	# lit entrance on the +X (avenue) side. Interior: Hospital.tscn.
+	var stone := Color(0.20, 0.22, 0.24)
+	_box(Vector3(14, 11, 12), base + Vector3(0, 5.5, 0), _mat(stone))
+	_box(Vector3(15, 1.4, 13), base + Vector3(0, 0.7, 0), _mat(stone.darkened(0.3)))          # foundation
+	_box(Vector3(15, 0.6, 13), base + Vector3(0, 11, 0), _mat(stone.darkened(0.2)))            # cornice
+	# Pediment + a faded medical cross over the door side (+X).
+	_box(Vector3(0.3, 2.4, 0.5), base + Vector3(7.05, 8, 0), _emissive(Color(0.5, 0.6, 0.55), 0.7))
+	_box(Vector3(0.3, 0.7, 1.6), base + Vector3(7.05, 8, 0), _emissive(Color(0.5, 0.6, 0.55), 0.7))
+	# Entrance: a tall warm doorway with steps.
+	_box(Vector3(0.5, 3.4, 3.0), base + Vector3(7.0, 1.7, 0), _mat(stone.darkened(0.3)))
+	_box(Vector3(0.22, 3.0, 2.2), base + Vector3(7.22, 1.5, 0), _emissive(WARM, 1.8))
+	_box(Vector3(2.0, 0.3, 4.0), base + Vector3(8.2, 0.15, 0), _mat(stone.darkened(0.25)))       # steps
+	# Windows up the face — a few lit, most dark or broken.
+	for fy in [4.0, 7.0]:
+		for wz in [-3.5, 0.0, 3.5]:
+			var lit := _rng.randf() > 0.6
+			_box(Vector3(0.12, 1.2, 1.0), base + Vector3(7.02, fy, wz), _emissive(COLD_WIN, 1.0) if lit else _mat(Color(0.05, 0.06, 0.07)))
+	# Copper steam pipes climbing the corner.
+	_conduit(base + Vector3(6.9, 0, 5.2), 10.0, Color(0.5, 0.6, 0.55))
+	_box(Vector3(1.0, 11, 1.0), base + Vector3(-6.5, 5.5, -5.5), _metal(COPPER.darkened(0.3)))
+	_chimney(base + Vector3(-3, 11, 3))
 
 
 func _clock_tower(base: Vector3) -> void:

@@ -34,6 +34,7 @@ class Flags:
 	const CINDER_HOME_HEATER_FIXED := "cinder_home_heater_fixed"
 	const CINDER_STEAM_LIFT_REPAIRED := "cinder_steam_lift_repaired"
 	const CINDER_WORKSHOP_ROW_POWERED := "cinder_workshop_row_powered"
+	const CINDER_HEALED_WORKER := "cinder_healed_worker"
 	const TALKED_TO_BRAM := "cinder_talked_to_bram"
 	const CINDER_LIFT_INSPECTED := "cinder_lift_inspected"
 
