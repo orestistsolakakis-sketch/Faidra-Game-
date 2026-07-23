@@ -63,7 +63,7 @@ func _diag_cube(pos: Vector3, col: Color) -> void:
 	var bm := BoxMesh.new()
 	bm.size = Vector3(3, 3, 3)
 	mi.mesh = bm
-	mi.material_override = _emissive(col, 1.5)  # uses the preloaded-material path
+	mi.material_override = _mat(col)  # unshaded path — should persist like the baked cube
 	mi.position = pos
 	add_child(mi)
 
@@ -586,8 +586,9 @@ func _add(mesh: Mesh, pos: Vector3, mat: StandardMaterial3D) -> void:
 
 
 func _mat(c: Color) -> StandardMaterial3D:
+	# Unshaded (see town_lit.tres): brighten a touch since there's no lighting.
 	var m: StandardMaterial3D = LIT_MAT.duplicate()
-	m.albedo_color = c
+	m.albedo_color = c * 1.5 + Color(0.06, 0.06, 0.07)
 	return m
 
 
