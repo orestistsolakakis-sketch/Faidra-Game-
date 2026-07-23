@@ -586,9 +586,14 @@ func _add(mesh: Mesh, pos: Vector3, mat: StandardMaterial3D) -> void:
 
 
 func _mat(c: Color) -> StandardMaterial3D:
-	# Unshaded (see town_lit.tres): brighten a touch since there's no lighting.
+	# Match the one material that reliably renders on the user's GPU: unshaded WITH
+	# emission (self-lit). Plain unshaded albedo was coming out invisible.
+	var col := c * 1.4 + Color(0.05, 0.05, 0.06)
 	var m: StandardMaterial3D = LIT_MAT.duplicate()
-	m.albedo_color = c * 1.5 + Color(0.06, 0.06, 0.07)
+	m.albedo_color = col
+	m.emission_enabled = true
+	m.emission = col
+	m.emission_energy_multiplier = 1.0
 	return m
 
 
