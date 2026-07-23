@@ -23,12 +23,9 @@ func _ready() -> void:
 
 	World.state.flag_changed.connect(_on_flag_changed)
 
-	# Opening beat: a directed reveal of the district on first arrival only.
-	if not World.state.get_flag(WorldFacts.Flags.CINDER_INTRO_SEEN):
-		World.state.set_flag(WorldFacts.Flags.CINDER_INTRO_SEEN, true)
-		party.call_deferred("play_intro")
-		_hud.show_title("CINDER HOLLOW", "The lowest district of the capital. Built on the bones of the old world.")
+	# Opening beat (no cinematic — that's deferred to the end of development).
 	_hud.set_objective("Find out what's making the Hollow sick.")
+	_hud.show_title("CINDER HOLLOW", "The lowest district of the capital. Built on the bones of the old world.")
 
 
 func _unhandled_input(event: InputEvent) -> void:
