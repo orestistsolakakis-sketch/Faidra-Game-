@@ -44,6 +44,9 @@ var _lift_running := false
 var _lift_t := 0.0
 var _lift_base := Vector3.ZERO
 
+# Workshop Row's street lamps: dark until Arlen mends the row's generator.
+var _row_lamps: Array = []  # each: {"bulb": MeshInstance3D, "light": OmniLight3D}
+
 # Road grid. Vertical roads run along Z; horizontal roads run along X.
 const V_ROADS := [-20.0, 0.0, 20.0]
 const H_ROADS := [8.0, -12.0, -26.0]
@@ -59,6 +62,7 @@ func _ready() -> void:
 	_setup_environment()
 	_build_town()
 	set_steam_lift_running(World.state.get_flag(WorldFacts.Flags.CINDER_STEAM_LIFT_REPAIRED))
+	set_workshop_row_powered(World.state.get_flag(WorldFacts.Flags.CINDER_WORKSHOP_ROW_POWERED))
 
 
 func _process(delta: float) -> void:
@@ -79,6 +83,14 @@ func set_steam_lift_running(on: bool) -> void:
 		_lift_light.light_energy = 3.4 if on else 0.0
 	if _lift_steam != null:
 		_lift_steam.emitting = on
+
+
+## Power (or cut) the whole Workshop Row — its street lamps come on when Arlen mends
+## the row's generator.
+func set_workshop_row_powered(on: bool) -> void:
+	for lamp in _row_lamps:
+		lamp["bulb"].material_override = _emissive(WARM, 3.0) if on else _mat(Color(0.10, 0.09, 0.08))
+		lamp["light"].light_energy = 2.2 if on else 0.0
 
 
 func _setup_environment() -> void:
@@ -165,6 +177,7 @@ func _build_town() -> void:
 	# --- Verticality: the district climbs and connects overhead ---
 	_landmarks()
 	_skyline()
+	_workshop_row(Vector3(0, 0, -31))   # a street of workshops south of the market
 
 	# --- Ambient life across the town ---
 	_street_crowd()
@@ -326,6 +339,112 @@ func _gasholder(base: Vector3) -> void:
 		ring.inner_radius = 8.2
 		ring.outer_radius = 8.7
 		_add(ring, base + Vector3(0, ry, 0), _metal(Color(0.09, 0.09, 0.10)))
+
+
+func _workshop_row(origin: Vector3) -> void:
+	# An east–west lane of workshops (doors facing north, onto the lane at z+3), each
+	# lit by its own forge, hung with tools; a mechanic working out front. No two the
+	# same. The row's street lamps stay dark until the shared generator is mended.
+	var xs := [-12.0, -6.0, 0.0, 6.0, 12.0]
+	for i in xs.size():
+		_workshop_front(origin + Vector3(xs[i], 0, 0), i)
+	# A workshop built inside the carcass of a dead machine at the east end.
+	_machine_workshop(origin + Vector3(19, 0, 0))
+	# Street lamps down the lane (off until powered).
+	for lx in [-9.0, -3.0, 3.0, 9.0]:
+		_row_lamps.append(_switch_lamp(origin + Vector3(lx, 0, 3.2)))
+	# The public generator that feeds the row.
+	_generator(origin + Vector3(0, 0, 3.0))
+	# A little life: a courier and a couple of onlookers by the generator.
+	_wanderer(origin + Vector3(-2, 0, 4), _pick(COATS_MARKET), 3.0, "teen")
+	_person(origin + Vector3(2, 0, 3.6), _pick(COATS_MARKET), "elder")
+
+
+func _workshop_front(pos: Vector3, variant: int) -> void:
+	var w := _rng.randf_range(5.0, 6.5)
+	var h := _rng.randf_range(4.5, 8.0)
+	var d := 6.0
+	var wall := BRICK.lerp(STONE, _rng.randf())
+	var fz := d * 0.5  # the north (lane-facing) wall
+	_box(Vector3(w, h, d), pos + Vector3(0, h * 0.5, 0), _mat(wall))
+	_box(Vector3(w + 0.3, 0.6, d + 0.3), pos + Vector3(0, 0.3, 0), _mat(wall.darkened(0.45)))
+	_box(Vector3(w + 0.4, 0.35, d + 0.4), pos + Vector3(0, h + 0.1, 0), _mat(wall.darkened(0.3)))
+	# A wide roll-up workshop door with a forge glowing inside.
+	_box(Vector3(w * 0.65, 2.6, 0.2), pos + Vector3(0, 1.3, fz + 0.06), _mat(Color(0.06, 0.05, 0.05)))
+	_box(Vector3(w * 0.5, 1.2, 1.0), pos + Vector3(0, 0.7, fz - 0.6), _emissive(FORGE, 2.4))
+	var fl := OmniLight3D.new()
+	fl.light_color = FORGE
+	fl.light_energy = 1.8
+	fl.omni_range = 6.0
+	fl.position = pos + Vector3(0, 1.0, fz - 0.6)
+	add_child(fl)
+	# A tool board bolted beside the door.
+	for t in 6:
+		_box(Vector3(0.1, _rng.randf_range(0.4, 0.9), 0.06), pos + Vector3(-w * 0.5 + 0.5 + t * 0.35, 2.6, fz + 0.05), _metal(Color(0.22, 0.22, 0.24)))
+	# A hanging trade sign — teal or copper by trade.
+	_hanging_sign(pos + Vector3(w * 0.5 - 0.3, 3.3, fz), TEAL if variant % 2 == 0 else COPPER)
+	# A mechanic at the doorway and some clutter.
+	_person(pos + Vector3(_rng.randf_range(-1.5, 1.5), 0, fz + 1.4), _pick(COATS_MARKET), "adult")
+	_crate(pos + Vector3(w * 0.5 - 0.6, 0, fz + 1.2), _rng.randf_range(0.6, 0.9))
+	if _rng.randf() > 0.5:
+		_barrel(pos + Vector3(-w * 0.5 + 0.6, 0, fz + 1.0))
+
+
+func _machine_workshop(pos: Vector3) -> void:
+	# A workshop someone built inside the shell of a dead industrial machine — the
+	# district in miniature: nothing thrown away, everything reused.
+	_box(Vector3(7, 7, 8), pos + Vector3(0, 3.5, 0), _metal(Color(0.14, 0.13, 0.13)))
+	var drum := CylinderMesh.new()
+	drum.top_radius = 2.4
+	drum.bottom_radius = 2.4
+	drum.height = 5.0
+	var mi := MeshInstance3D.new()
+	mi.mesh = drum
+	mi.material_override = _metal(Color(0.16, 0.14, 0.12))
+	mi.position = pos + Vector3(0, 5.0, 0)
+	mi.rotation.z = PI * 0.5
+	add_child(mi)
+	_box(Vector3(2.2, 2.6, 0.2), pos + Vector3(0, 1.3, 4.0), _emissive(WARM, 1.8))   # a warm doorway cut into it
+	for gy in [2.0, 4.0]:
+		var gear := CylinderMesh.new()
+		gear.top_radius = 1.4
+		gear.bottom_radius = 1.4
+		gear.height = 0.4
+		var gm := MeshInstance3D.new()
+		gm.mesh = gear
+		gm.material_override = _metal(COPPER.darkened(0.2))
+		gm.position = pos + Vector3(3.6, gy, 1.0)
+		gm.rotation.y = PI * 0.5
+		add_child(gm)
+	_conduit(pos + Vector3(-3.6, 0, 2), 6.5, TEAL)
+
+
+func _switch_lamp(pos: Vector3) -> Dictionary:
+	# A street lamp that starts dark. Returns handles so it can be switched on later.
+	_box(Vector3(0.14, 3.6, 0.14), pos + Vector3(0, 1.8, 0), _metal(Color(0.11, 0.11, 0.12)))
+	_box(Vector3(0.34, 0.5, 0.34), pos + Vector3(0, 3.4, 0), _metal(Color(0.08, 0.08, 0.09)))
+	var bulb := MeshInstance3D.new()
+	var bm := BoxMesh.new()
+	bm.size = Vector3(0.22, 0.36, 0.22)
+	bulb.mesh = bm
+	bulb.material_override = _mat(Color(0.10, 0.09, 0.08))
+	bulb.position = pos + Vector3(0, 3.4, 0)
+	add_child(bulb)
+	var light := OmniLight3D.new()
+	light.light_color = WARM
+	light.light_energy = 0.0
+	light.omni_range = 8.0
+	light.position = pos + Vector3(0, 3.4, 0)
+	add_child(light)
+	return {"bulb": bulb, "light": light}
+
+
+func _generator(pos: Vector3) -> void:
+	# A public junction generator feeding the row — dead, its dials dark.
+	_box(Vector3(1.8, 2.0, 1.2), pos + Vector3(0, 1.0, 0), _metal(Color(0.13, 0.13, 0.15)))
+	_box(Vector3(1.4, 0.6, 0.15), pos + Vector3(0, 1.3, 0.65), _mat(Color(0.06, 0.07, 0.08)))  # dark dial panel
+	_box(Vector3(0.3, 1.4, 0.3), pos + Vector3(0.9, 2.2, 0), _metal(Color(0.10, 0.10, 0.11)))   # vent stack
+	_conduit(pos + Vector3(-1.2, 0, 0), 3.5, MAGENTA)
 
 
 func _steam_lift(base: Vector3) -> void:

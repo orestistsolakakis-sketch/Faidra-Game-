@@ -33,6 +33,7 @@ class Flags:
 	const CINDER_INTRO_SEEN := "cinder_intro_seen"
 	const CINDER_HOME_HEATER_FIXED := "cinder_home_heater_fixed"
 	const CINDER_STEAM_LIFT_REPAIRED := "cinder_steam_lift_repaired"
+	const CINDER_WORKSHOP_ROW_POWERED := "cinder_workshop_row_powered"
 	const TALKED_TO_BRAM := "cinder_talked_to_bram"
 	const CINDER_LIFT_INSPECTED := "cinder_lift_inspected"
 

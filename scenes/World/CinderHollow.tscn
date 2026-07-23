@@ -204,6 +204,16 @@ verb = "Examine / Repair"
 [node name="Shape" type="CollisionShape3D" parent="SteamLiftPanel"]
 shape = SubResource("SphereBig")
 
+[node name="WorkshopGenerator" type="Area3D" parent="." groups=["interactable"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -27.6)
+script = ExtResource("7_inter")
+id = "workshop_generator"
+label = "Workshop Row — the dead generator"
+verb = "Examine / Repair"
+
+[node name="Shape" type="CollisionShape3D" parent="WorkshopGenerator"]
+shape = SubResource("SphereBig")
+
 [node name="Hud" type="CanvasLayer" parent="."]
 unique_name_in_owner = true
 script = ExtResource("6_hud")

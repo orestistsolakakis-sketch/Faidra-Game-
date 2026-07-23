@@ -75,6 +75,8 @@ func _interact(which: Node) -> void:
 			SceneLoader.transition_to("res://scenes/World/CinderHome.tscn", GameState.PLAYING)
 		"steam_lift":
 			_repair_steam_lift()
+		"workshop_generator":
+			_repair_generator()
 		"scrap_exchange_door":
 			_hud.push_toast("", "Shuttered — Old Rennick trades out on the street for now. The Exchange opens later.")
 		"broken_bell_door":
@@ -102,6 +104,20 @@ func _repair_steam_lift() -> void:
 		World.traits.adjust(Traits.RESOLVE, 6)
 	_hud.push_toast("WORLD UPDATED", "The seized coupling gives. Steam screams through the pipes and the great cage shudders into motion. Half the Hollow just got its shortcut back — and a foundryman his easier shift.")
 	_hud.set_objective("The Steam Lift runs again. The district feels a little more connected.")
+
+
+func _repair_generator() -> void:
+	if World.state.get_flag(WorldFacts.Flags.CINDER_WORKSHOP_ROW_POWERED):
+		_hud.push_toast("", "The generator hums. Down the lane, the lamps burn steady.")
+		return
+	World.state.set_flag(WorldFacts.Flags.CINDER_WORKSHOP_ROW_POWERED, true)
+	var district := get_node_or_null("District")
+	if district != null and district.has_method("set_workshop_row_powered"):
+		district.set_workshop_row_powered(true)
+	if World.traits != null:
+		World.traits.adjust(Traits.INSIGHT, 5)
+	_hud.push_toast("WORLD UPDATED", "You trace the fault to a shorted feed, not a dead core. One reconnection and the row's lamps stutter, then hold. Work can go on after dark now.")
+	_hud.set_objective("Workshop Row has its light back.")
 
 
 func _start_scene(scene_id: String) -> void:
