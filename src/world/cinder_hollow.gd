@@ -128,6 +128,10 @@ func _build_town() -> void:
 	# Station square (east) with its crowd and the underground rail entrance.
 	_station_square(Vector3(31, 0, -8))
 
+	# --- Verticality: the district climbs and connects overhead ---
+	_landmarks()
+	_skyline()
+
 	# --- Ambient life across the town ---
 	_street_crowd()
 	_fan(Vector3(-6.7, 4.5, 6), Vector3(0, 0, 1))
@@ -178,6 +182,211 @@ func _atmosphere() -> void:
 	_crate(Vector3(4.8, 0, 5), 0.8)
 	_crate(Vector3(4.8, 0, 5.9), 0.6)
 	_crate(Vector3(-4.9, 0, -6), 0.7)
+
+
+# --------------------------------------------------------------------------
+# Verticality: landmarks + the layered skyline
+# --------------------------------------------------------------------------
+
+func _landmarks() -> void:
+	# Huge silhouettes on the ridge behind the district — visible from everywhere,
+	# giving the Hollow a skyline and the player things to navigate toward.
+	_factory_tower(Vector3(34, 0, -34))
+	_factory_tower(Vector3(-30, 0, -36))
+	_clock_tower(Vector3(-38, 0, 14))
+	_heart_machine(Vector3(31, 0, -14))   # the great glowing engine by the station
+	_gasholder(Vector3(40, 0, 4))
+
+
+func _factory_tower(base: Vector3) -> void:
+	# A brick-and-iron works: stepped mass, banded stacks belching smoke, a furnace
+	# glow at its foot. The defining shape of Cinder Hollow's skyline.
+	_box(Vector3(16, 26, 14), base + Vector3(0, 13, 0), _mat(BRICK.darkened(0.2)))
+	_box(Vector3(11, 12, 10), base + Vector3(2, 32, 0), _mat(BRICK.darkened(0.1)))
+	_box(Vector3(17, 1.4, 15), base + Vector3(0, 26, 0), _mat(STONE.darkened(0.2)))  # ledge
+	# Riveted iron bands.
+	for by in [6.0, 12.0, 18.0]:
+		_box(Vector3(16.4, 0.5, 14.4), base + Vector3(0, by, 0), _metal(Color(0.10, 0.09, 0.09)))
+	# Furnace mouth at the base — hot glow + heat haze.
+	_box(Vector3(4, 3, 0.4), base + Vector3(-4, 2, -7.1), _emissive(FORGE, 3.0))
+	var flight := OmniLight3D.new()
+	flight.light_color = FORGE
+	flight.light_energy = 4.0
+	flight.omni_range = 16.0
+	flight.position = base + Vector3(-4, 3, -7)
+	add_child(flight)
+	# Chimney stacks with smoke and a warning beacon.
+	for sx in [-5.0, 0.0, 5.0]:
+		var h := _rng.randf_range(16.0, 22.0)
+		_box(Vector3(2.4, h, 2.4), base + Vector3(sx, 38 + h * 0.5, 0), _mat(BRICK.darkened(0.25)))
+		_box(Vector3(2.9, 1.0, 2.9), base + Vector3(sx, 38 + h, 0), _metal(Color(0.09, 0.09, 0.1)))
+		_smoke(base + Vector3(sx, 38 + h + 0.6, 0))
+	_add_beacon(base + Vector3(0, 50, 0), MAGENTA)
+	# Big exterior pipes running down the face.
+	for px in [-6.5, 6.5]:
+		_box(Vector3(1.1, 30, 1.1), base + Vector3(px, 15, -7.2), _metal(COPPER.darkened(0.3)))
+
+
+func _clock_tower(base: Vector3) -> void:
+	# A cracked civic clock — a quieter landmark, its face still faintly lit.
+	_box(Vector3(6, 30, 6), base + Vector3(0, 15, 0), _mat(STONE.darkened(0.1)))
+	_box(Vector3(7, 2, 7), base + Vector3(0, 30, 0), _mat(STONE.darkened(0.25)))
+	# The clock face (front, -Z), dim and broken.
+	var face := CylinderMesh.new()
+	face.top_radius = 2.0
+	face.bottom_radius = 2.0
+	face.height = 0.3
+	var mi := MeshInstance3D.new()
+	mi.mesh = face
+	mi.material_override = _emissive(Color(0.9, 0.85, 0.6), 1.1)
+	mi.position = base + Vector3(0, 24, -3.1)
+	mi.rotation.x = PI * 0.5
+	add_child(mi)
+	# Broken cap — a leaning spire.
+	var spire := MeshInstance3D.new()
+	var pm := PrismMesh.new()
+	pm.size = Vector3(5, 6, 5)
+	spire.mesh = pm
+	spire.material_override = _metal(Color(0.10, 0.11, 0.12))
+	spire.position = base + Vector3(0.6, 34, 0)
+	spire.rotation.z = 0.16
+	add_child(spire)
+
+
+func _heart_machine(base: Vector3) -> void:
+	# A great humming engine — teal Lifeline core, spinning flywheels, a bank of pipes.
+	_box(Vector3(10, 9, 10), base + Vector3(0, 4.5, 0), _metal(Color(0.12, 0.13, 0.15)))
+	var core := SphereMesh.new()
+	core.radius = 2.6
+	core.height = 5.2
+	_add(core, base + Vector3(0, 6, 0), _emissive(TEAL, 3.2))
+	var clight := OmniLight3D.new()
+	clight.light_color = TEAL
+	clight.light_energy = 5.0
+	clight.omni_range = 18.0
+	clight.position = base + Vector3(0, 6, 0)
+	add_child(clight)
+	# Flanking flywheels (they turn).
+	for sx in [-6.0, 6.0]:
+		_fan(base + Vector3(sx, 5, 0), Vector3(1, 0, 0))
+	# A bank of vertical pipes rising off the top.
+	for i in range(-2, 3):
+		_box(Vector3(0.8, 8, 0.8), base + Vector3(i * 1.6, 12, -3), _metal(COPPER.darkened(0.2)))
+	_conduit(base + Vector3(-5.2, 0, 3), 9.0, TEAL)
+	_conduit(base + Vector3(5.2, 0, 3), 9.0, TEAL)
+
+
+func _gasholder(base: Vector3) -> void:
+	# A big riveted gas cylinder in its guide-frame — industrial bulk on the horizon.
+	var drum := CylinderMesh.new()
+	drum.top_radius = 8.0
+	drum.bottom_radius = 8.0
+	drum.height = 16.0
+	_add(drum, base + Vector3(0, 8, 0), _metal(Color(0.14, 0.13, 0.12)))
+	for a in range(10):
+		var ang := a * TAU / 10.0
+		_box(Vector3(0.5, 20, 0.5), base + Vector3(cos(ang) * 8.4, 10, sin(ang) * 8.4), _metal(Color(0.09, 0.09, 0.10)))
+	for ry in [5.0, 11.0, 17.0]:
+		var ring := TorusMesh.new()
+		ring.inner_radius = 8.2
+		ring.outer_radius = 8.7
+		_add(ring, base + Vector3(0, ry, 0), _metal(Color(0.09, 0.09, 0.10)))
+
+
+func _add_beacon(pos: Vector3, color: Color) -> void:
+	var b := SphereMesh.new()
+	b.radius = 0.5
+	b.height = 1.0
+	_add(b, pos, _emissive(color, 4.0))
+	var l := OmniLight3D.new()
+	l.light_color = color
+	l.light_energy = 3.0
+	l.omni_range = 10.0
+	l.position = pos
+	add_child(l)
+
+
+func _skyline() -> void:
+	# The middle layer: skybridges linking upper floors across the main street,
+	# fat industrial pipe-runs overhead, and catwalks with their support legs — so
+	# the player always sees the district stacked above them.
+	for z in [10.0, -6.0, -18.0]:
+		_skybridge(Vector3(-7, 7.5, z), Vector3(7, 7.5, z))
+	# Pipe-runs threading the street at two heights.
+	_pipe_run(Vector3(-6.8, 9.0, 16), Vector3(-6.8, 9.0, -28), 0.9, COPPER.darkened(0.2))
+	_pipe_run(Vector3(6.8, 10.5, 14), Vector3(6.8, 10.5, -26), 0.7, Color(0.12, 0.12, 0.13))
+	_pipe_run(Vector3(-20.5, 8.0, 20), Vector3(-20.5, 8.0, -30), 0.8, COPPER.darkened(0.3))
+	# A long catwalk running above the east avenue, reachable-looking with stair towers.
+	_catwalk(Vector3(20, 6.5, 18), Vector3(20, 6.5, -24))
+	# Rooftop water tanks on the taller downtown blocks.
+	for tp in [Vector3(11, 13, -2), Vector3(10, 14, 15), Vector3(-31, 15, 15)]:
+		_water_tank(tp)
+
+
+func _skybridge(a: Vector3, b: Vector3) -> void:
+	var mid := (a + b) * 0.5
+	var span := (b - a).length()
+	# Deck + railings + a couple of under-truss supports.
+	_box(Vector3(span, 0.25, 2.2), mid, _metal(Color(0.11, 0.11, 0.12)))
+	for side in [-1.0, 1.0]:
+		_box(Vector3(span, 0.9, 0.1), mid + Vector3(0, 0.55, side * 1.05), _metal(Color(0.10, 0.10, 0.11)))
+	for t in [0.25, 0.5, 0.75]:
+		_box(Vector3(0.2, 1.4, 0.2), a.lerp(b, t) + Vector3(0, -0.8, 0), _metal(Color(0.09, 0.09, 0.10)))
+	# A warm lantern hung at the middle.
+	_add(_bulb_mesh(), mid + Vector3(0, 1.2, 0), _emissive(WARM, 2.6))
+
+
+func _pipe_run(a: Vector3, b: Vector3, radius: float, col: Color) -> void:
+	var mid := (a + b) * 0.5
+	var span := (b - a).length()
+	var pipe := CylinderMesh.new()
+	pipe.top_radius = radius
+	pipe.bottom_radius = radius
+	pipe.height = span
+	var mi := MeshInstance3D.new()
+	mi.mesh = pipe
+	mi.material_override = _metal(col)
+	add_child(mi)
+	mi.look_at_from_position(mid, b, Vector3.UP)
+	mi.rotate_object_local(Vector3(1, 0, 0), PI * 0.5)  # cylinder axis is Y -> align to span
+	# Support brackets along the run.
+	var n := int(span / 8.0)
+	for i in range(n + 1):
+		var p := a.lerp(b, float(i) / maxf(1.0, float(n)))
+		_box(Vector3(0.3, 2.0, 0.3), p + Vector3(0, -1.0, 0), _metal(Color(0.09, 0.09, 0.10)))
+
+
+func _catwalk(a: Vector3, b: Vector3) -> void:
+	var mid := (a + b) * 0.5
+	var span := (b - a).length()
+	_box(Vector3(1.8, 0.18, span), mid, _metal(Color(0.12, 0.12, 0.13)))
+	for side in [-1.0, 1.0]:
+		_box(Vector3(0.08, 0.85, span), mid + Vector3(side * 0.9, 0.5, 0), _metal(Color(0.10, 0.10, 0.11)))
+	# Support legs down to the street and a lamp or two.
+	var n := int(span / 6.0)
+	for i in range(n + 1):
+		var p := a.lerp(b, float(i) / maxf(1.0, float(n)))
+		_box(Vector3(0.25, a.y, 0.25), Vector3(p.x, a.y * 0.5, p.z), _metal(Color(0.09, 0.09, 0.10)))
+		if i % 2 == 0:
+			_add(_bulb_mesh(), p + Vector3(0, 1.1, 0), _emissive(WARM, 2.2))
+
+
+func _water_tank(pos: Vector3) -> void:
+	var tank := CylinderMesh.new()
+	tank.top_radius = 2.0
+	tank.bottom_radius = 2.0
+	tank.height = 3.2
+	_add(tank, pos + Vector3(0, 1.6, 0), _metal(Color(0.13, 0.11, 0.09)))
+	for lx in [-1.3, 1.3]:
+		for lz in [-1.3, 1.3]:
+			_box(Vector3(0.18, 1.0, 0.18), pos + Vector3(lx, 0.5, lz), _metal(Color(0.09, 0.09, 0.10)))
+
+
+func _bulb_mesh() -> SphereMesh:
+	var b := SphereMesh.new()
+	b.radius = 0.13
+	b.height = 0.26
+	return b
 
 
 # --------------------------------------------------------------------------

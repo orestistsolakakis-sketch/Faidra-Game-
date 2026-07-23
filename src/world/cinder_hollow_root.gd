@@ -23,7 +23,8 @@ func _ready() -> void:
 
 	World.state.flag_changed.connect(_on_flag_changed)
 
-	# Opening beat.
+	# Opening beat: a directed reveal of the district, then control returns.
+	party.call_deferred("play_intro")
 	_hud.set_objective("Find out what's making the Hollow sick.")
 	_hud.show_title("CINDER HOLLOW", "The lowest district of the capital. Built on the bones of the old world.")
 

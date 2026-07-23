@@ -19,7 +19,11 @@ var _pivot: Node3D
 var _spring: SpringArm3D
 var _active_index := 0
 var _yaw := 0.0
-var _pitch := -0.3
+var _pitch := -0.28
+var _spring_len := 4.4
+
+## While a cinematic owns the camera, the follow rig stands down.
+var suspended := false
 
 
 func _ready() -> void:
@@ -27,11 +31,44 @@ func _ready() -> void:
 
 	_pivot = get_node(camera_pivot_path)
 	_spring = _pivot.get_node_or_null("SpringArm3D")
+	if _spring != null:
+		_spring_len = _spring.spring_length
 
 	for path in character_paths:
 		_characters.append(get_node(path))
 	if _characters.size() > 0:
 		_set_active(0)
+
+
+## A directed reveal: start high and wide over the district, then orbit down into
+## the normal over-the-shoulder framing and hand control back to the player.
+func play_intro() -> void:
+	if _characters.is_empty() or _pivot == null:
+		return
+	suspended = true
+	GameModeManager.set_mode(GameMode.CINEMATIC)  # freeze movement during the reveal
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	var target: Node3D = _characters[_active_index]
+	var focus: Vector3 = target.global_position + Vector3.UP * eye_height
+
+	# Establishing pose: raised and swung around, looking back across the Hollow.
+	_pivot.global_position = focus + Vector3(9.0, 7.0, 8.0)
+	_pivot.rotation = Vector3(0.0, deg_to_rad(155.0), 0.0)
+	if _spring != null:
+		_spring.spring_length = 11.0
+		_spring.rotation.x = -0.5
+
+	var tw := create_tween().set_parallel(true).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	tw.tween_property(_pivot, "global_position", focus, 6.5)
+	tw.tween_property(_pivot, "rotation:y", 0.0, 6.5)
+	if _spring != null:
+		tw.tween_property(_spring, "spring_length", _spring_len, 6.5)
+		tw.tween_property(_spring, "rotation:x", _pitch, 6.5)
+	await tw.finished
+
+	_yaw = 0.0
+	suspended = false
+	GameModeManager.exit_to_exploration()
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -41,6 +78,9 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _process(delta: float) -> void:
+	if suspended:
+		return  # a cinematic is driving the camera
+
 	# Free the cursor whenever the player isn't in direct control.
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED if _can_control() else Input.MOUSE_MODE_VISIBLE
 
