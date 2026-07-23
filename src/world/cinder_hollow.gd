@@ -585,21 +585,12 @@ func _add(mesh: Mesh, pos: Vector3, mat: StandardMaterial3D) -> void:
 	add_child(mi)
 
 
-func _mat(c: Color) -> StandardMaterial3D:
-	# Match the one material that reliably renders on the user's GPU: unshaded WITH
-	# emission (self-lit). Plain unshaded albedo was coming out invisible.
-	var col := c * 1.4 + Color(0.05, 0.05, 0.06)
-	var m: StandardMaterial3D = LIT_MAT.duplicate()
-	m.albedo_color = col
-	m.emission_enabled = true
-	m.emission = col
-	m.emission_energy_multiplier = 1.0
-	return m
+func _mat(_c: Color) -> StandardMaterial3D:
+	# TEST (BUILD 29): return the SHARED baked material resource with no duplication
+	# or modification. If the town now persists, code-created materials were the bug.
+	return EMIS_MAT
 
 
-func _emissive(c: Color, energy: float) -> StandardMaterial3D:
-	var m: StandardMaterial3D = EMIS_MAT.duplicate()
-	m.albedo_color = c
-	m.emission = c
-	m.emission_energy_multiplier = energy
-	return m
+func _emissive(_c: Color, _energy: float) -> StandardMaterial3D:
+	# TEST (BUILD 29): shared baked resource, no duplication.
+	return EMIS_MAT
