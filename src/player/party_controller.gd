@@ -35,6 +35,7 @@ var _pitch := -0.24
 var _spring_len := 4.4
 var _sway_t := 0.0
 var _lead := Vector3.ZERO
+var _intro_tween: Tween
 
 
 func _ready() -> void:
@@ -59,9 +60,10 @@ func _ready() -> void:
 func play_intro() -> void:
 	if _characters.is_empty() or _pivot == null:
 		return
+	# NOTE: we deliberately do NOT lock movement here. The camera drifts on its own,
+	# but the moment the player touches a movement key the reveal ends and full control
+	# snaps in — so it is impossible to get stranded by the cinematic.
 	suspended = true
-	GameModeManager.set_mode(GameMode.CINEMATIC)  # freeze movement during the reveal
-	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	var target: Node3D = _characters[_active_index]
 	var focus: Vector3 = target.global_position + Vector3.UP * eye_height
 
@@ -72,17 +74,26 @@ func play_intro() -> void:
 		_spring.spring_length = 11.0
 		_spring.rotation.x = -0.5
 
-	var tw := create_tween().set_parallel(true).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	tw.tween_property(_pivot, "global_position", focus, 6.5)
-	tw.tween_property(_pivot, "rotation:y", 0.0, 6.5)
+	_intro_tween = create_tween().set_parallel(true).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	_intro_tween.tween_property(_pivot, "global_position", focus, 6.0)
+	_intro_tween.tween_property(_pivot, "rotation:y", 0.0, 6.0)
 	if _spring != null:
-		tw.tween_property(_spring, "spring_length", _spring_len, 6.5)
-		tw.tween_property(_spring, "rotation:x", _pitch, 6.5)
-	await tw.finished
+		_intro_tween.tween_property(_spring, "spring_length", _spring_len, 6.0)
+		_intro_tween.tween_property(_spring, "rotation:x", _pitch, 6.0)
+	await _intro_tween.finished
+	_end_intro()
 
+
+func _end_intro() -> void:
+	if not suspended:
+		return
+	if _intro_tween != null and _intro_tween.is_valid():
+		_intro_tween.kill()
+	_intro_tween = null
+	_pivot.rotation.x = 0.0
 	_yaw = 0.0
+	_pitch = -0.24
 	suspended = false
-	GameModeManager.exit_to_exploration()
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -93,7 +104,13 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _process(delta: float) -> void:
 	if suspended:
-		return  # a cinematic is driving the camera
+		# The intro reveal is playing — let the player skip it the instant they move.
+		var wants_control := Input.get_vector(
+			PlayerInput.MOVE_LEFT, PlayerInput.MOVE_RIGHT,
+			PlayerInput.MOVE_FORWARD, PlayerInput.MOVE_BACK) != Vector2.ZERO
+		if wants_control or Input.is_action_just_pressed(PlayerInput.JUMP):
+			_end_intro()
+		return
 
 	# Free the cursor whenever the player isn't in direct control.
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED if _can_control() else Input.MOUSE_MODE_VISIBLE
