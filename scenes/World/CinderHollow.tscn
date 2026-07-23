@@ -78,8 +78,8 @@ camera_pivot_path = NodePath("../CameraPivot")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 13)
 script = ExtResource("7_inter")
 id = "workshop_door"
-label = "Workshop Door"
-verb = "Repair"
+label = "Arlen's Workshop"
+verb = "Enter"
 
 [node name="Shape" type="CollisionShape3D" parent="WorkshopDoor"]
 shape = SubResource("SphereSmall")

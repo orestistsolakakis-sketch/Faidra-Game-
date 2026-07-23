@@ -23,10 +23,12 @@ func _ready() -> void:
 
 	World.state.flag_changed.connect(_on_flag_changed)
 
-	# Opening beat: a directed reveal of the district, then control returns.
-	party.call_deferred("play_intro")
+	# Opening beat: a directed reveal of the district on first arrival only.
+	if not World.state.get_flag(WorldFacts.Flags.CINDER_INTRO_SEEN):
+		World.state.set_flag(WorldFacts.Flags.CINDER_INTRO_SEEN, true)
+		party.call_deferred("play_intro")
+		_hud.show_title("CINDER HOLLOW", "The lowest district of the capital. Built on the bones of the old world.")
 	_hud.set_objective("Find out what's making the Hollow sick.")
-	_hud.show_title("CINDER HOLLOW", "The lowest district of the capital. Built on the bones of the old world.")
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -54,11 +56,7 @@ func _try_interact() -> void:
 func _interact(which: Node) -> void:
 	match which.id:
 		"workshop_door":
-			if World.state.get_flag(WorldFacts.Flags.CINDER_WORKSHOP_DOOR_FIXED):
-				_hud.push_toast("", "It's open now. Some things you can just fix.")
-			else:
-				World.state.set_flag(WorldFacts.Flags.CINDER_WORKSHOP_DOOR_FIXED, true)
-				_hud.push_toast("", "The door grinds open on the first real push.")
+			SceneLoader.transition_to("res://scenes/World/WorkshopInterior.tscn", GameState.PLAYING)
 		"bram":
 			if World.state.get_flag(WorldFacts.Flags.TALKED_TO_BRAM):
 				_hud.push_toast("", "Bram: \"Go on, then. The tunnels won't wait.\"")

@@ -1,0 +1,116 @@
+[gd_scene load_steps=12 format=3 uid="uid://blumenfallworkshop01"]
+
+[ext_resource type="Script" path="res://src/world/workshop_interior_root.gd" id="1_root"]
+[ext_resource type="Script" path="res://src/player/player_character.gd" id="2_char"]
+[ext_resource type="Script" path="res://src/player/party_controller.gd" id="3_party"]
+[ext_resource type="Script" path="res://src/player/character_model.gd" id="4_model"]
+[ext_resource type="Script" path="res://src/world/workshop_interior.gd" id="5_env"]
+[ext_resource type="Script" path="res://src/ui/game_hud.gd" id="6_hud"]
+[ext_resource type="Script" path="res://src/interaction/interactable.gd" id="7_inter"]
+
+[sub_resource type="BoxShape3D" id="FloorShape"]
+size = Vector3(14, 1, 16)
+
+[sub_resource type="CapsuleShape3D" id="CapShape"]
+radius = 0.4
+height = 1.8
+
+[sub_resource type="SphereShape3D" id="SphereBig"]
+radius = 2.6
+
+[sub_resource type="SphereShape3D" id="SphereSmall"]
+radius = 2.0
+
+[node name="WorkshopInterior" type="Node3D"]
+script = ExtResource("1_root")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.707, -0.5, 0.5, 0, 0.707, 0.707, -0.707, -0.5, 0.5, 0, 8, 0)
+light_color = Color(0.7, 0.6, 0.5, 1)
+light_energy = 0.12
+
+[node name="Environment" type="Node3D" parent="."]
+script = ExtResource("5_env")
+
+[node name="Floor" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+
+[node name="Collision" type="CollisionShape3D" parent="Floor"]
+shape = SubResource("FloorShape")
+
+[node name="Arlen" type="CharacterBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 6)
+script = ExtResource("2_char")
+character_id = "arlen"
+
+[node name="Collision" type="CollisionShape3D" parent="Arlen"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("CapShape")
+
+[node name="Model" type="MeshInstance3D" parent="Arlen"]
+script = ExtResource("4_model")
+model_path = "res://assets/models/arlen.obj"
+tint = Color(0.8, 0.78, 0.82, 1)
+yaw_offset_deg = 180.0
+
+[node name="CameraPivot" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, 6)
+
+[node name="SpringArm3D" type="SpringArm3D" parent="CameraPivot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0.3, 0)
+spring_length = 3.6
+margin = 0.3
+
+[node name="Camera3D" type="Camera3D" parent="CameraPivot/SpringArm3D"]
+current = true
+fov = 60.0
+
+[node name="PartyController" type="Node3D" parent="."]
+process_mode = 3
+script = ExtResource("3_party")
+character_paths = Array[NodePath]([NodePath("../Arlen")])
+camera_pivot_path = NodePath("../CameraPivot")
+
+[node name="WorkshopExit" type="Area3D" parent="." groups=["interactable"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 7.4)
+script = ExtResource("7_inter")
+id = "workshop_exit"
+label = "Workshop Door"
+verb = "Step outside"
+
+[node name="Shape" type="CollisionShape3D" parent="WorkshopExit"]
+shape = SubResource("SphereBig")
+
+[node name="WorkshopMachine" type="Area3D" parent="." groups=["interactable"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 1, -4)
+script = ExtResource("7_inter")
+id = "workshop_machine"
+label = "The broken machine"
+verb = "Examine / Repair"
+
+[node name="Shape" type="CollisionShape3D" parent="WorkshopMachine"]
+shape = SubResource("SphereBig")
+
+[node name="WorkshopBench" type="Area3D" parent="." groups=["interactable"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.5, 1, 4.5)
+script = ExtResource("7_inter")
+id = "workshop_bench"
+label = "Workbench"
+verb = "Look"
+
+[node name="Shape" type="CollisionShape3D" parent="WorkshopBench"]
+shape = SubResource("SphereSmall")
+
+[node name="WorkshopDiagram" type="Area3D" parent="." groups=["interactable"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 1.6, -7)
+script = ExtResource("7_inter")
+id = "workshop_diagram"
+label = "Old schematics"
+verb = "Read"
+
+[node name="Shape" type="CollisionShape3D" parent="WorkshopDiagram"]
+shape = SubResource("SphereSmall")
+
+[node name="Hud" type="CanvasLayer" parent="."]
+unique_name_in_owner = true
+script = ExtResource("6_hud")
