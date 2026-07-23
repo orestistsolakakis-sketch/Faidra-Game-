@@ -31,7 +31,7 @@ func _ready() -> void:
 
 
 func new_game() -> void:
-	clock.restore({"total_minutes": 0})
+	clock.restore({"total_minutes": 480})  # start at 08:00 — a working morning in the Hollow
 	state.reset()
 	events.reset()
 	relationships.reset()

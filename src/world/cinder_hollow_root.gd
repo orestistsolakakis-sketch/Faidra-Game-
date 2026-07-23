@@ -72,6 +72,12 @@ func _interact(which: Node) -> void:
 			_start_scene(CinderHollowScenes.DARA_ID)
 		"rail_station":
 			SceneLoader.transition_to("res://scenes/World/CinderUnderground.tscn", GameState.PLAYING)
+		"copper_kettle_door":
+			SceneLoader.transition_to("res://scenes/World/CopperKettle.tscn", GameState.PLAYING)
+		"scrap_exchange_door":
+			_hud.push_toast("", "Shuttered — Old Rennick trades out on the street for now. The Exchange opens later.")
+		"broken_bell_door":
+			_hud.push_toast("", "Locked this early. The Bell keeps its own hours, and its own secrets.")
 		"neighbor":
 			_hud.push_toast("", "A wet, rattling cough behind the door. It started three days ago.")
 		"lift":

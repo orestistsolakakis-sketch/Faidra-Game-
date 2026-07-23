@@ -52,6 +52,20 @@ func advance_days(days: float) -> void:
 	advance(int(round(days * MINUTES_PER_DAY)))
 
 
+## Coarse time-of-day band the world dresses itself by (routines, tavern activity…).
+func part_of_day() -> String:
+	var h := hour()
+	if h < 6:
+		return "night"
+	elif h < 11:
+		return "morning"
+	elif h < 17:
+		return "afternoon"
+	elif h < 22:
+		return "evening"
+	return "night"
+
+
 func to_display_string() -> String:
 	return "Day %d · %02d:%02d" % [day(), hour(), minute()]
 

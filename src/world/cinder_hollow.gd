@@ -20,6 +20,7 @@ const MAGENTA := Color(1.0, 0.36, 0.48)
 const STONE := Color(0.14, 0.16, 0.20)
 const BRICK := Color(0.22, 0.16, 0.13)
 const COPPER := Color(0.45, 0.32, 0.22)
+const WOOD_COL := Color(0.22, 0.15, 0.09)
 const GROUND := Color(0.06, 0.07, 0.06)
 const ROAD := Color(0.07, 0.08, 0.10)
 const WALK := Color(0.20, 0.21, 0.24)
@@ -97,6 +98,7 @@ func _build_town() -> void:
 	_workshop(Vector3(0, 0, 18))                       # home (behind spawn)
 	_lift(Vector3(0, 0, -24))                           # objective (ahead)
 	_market_row()                                       # stalls, braziers, merchants
+	_central_market()                                   # elevated railway, vendors, the Kettle/Bell/Exchange
 	# Lifelines glowing along the main street: healthy teal near home -> magenta ahead.
 	for i in range(-18, 14):
 		var z := i * 1.5
@@ -556,6 +558,119 @@ func _market_row() -> void:
 	_stall(Vector3(4.5, 0, 1))
 	_brazier(Vector3(-2.6, 0, -1))
 	_brazier(Vector3(2.6, 0, -5))
+
+
+func _central_market() -> void:
+	# The market lives UNDER an elevated railway viaduct — a heavy deck on brick piers
+	# roofing the street, steam venting off the track above. Below: vendors, hanging
+	# cloth, a performer, delivery clutter and a milling crowd; and three named doors.
+	_market_viaduct()
+
+	# The three market institutions (doors wired in CinderHollow.tscn / _root).
+	_market_building(Vector3(8.5, 0, 3.0), -1.0, 9.0, WARM)      # The Copper Kettle (enterable)
+	_market_building(Vector3(8.5, 0, -7.0), -1.0, 8.0, TEAL)     # The Scrap Exchange
+	_market_building(Vector3(-8.5, 0, -3.0), 1.0, 10.0, MAGENTA) # The Broken Bell
+
+	# Extra stalls + covered awnings deeper into the market.
+	for sp in [Vector3(-4.4, 0, 5), Vector3(4.4, 0, 5), Vector3(-4.4, 0, -7), Vector3(4.4, 0, -13)]:
+		_stall(sp)
+	# Hanging market cloth strung between the flanking buildings.
+	for z in [4.0, -2.0, -8.0]:
+		_market_cloth(Vector3(-5.5, 4.2, z), Vector3(5.5, 4.2, z))
+	# Vendors at their stalls, a street performer, and shoppers moving through.
+	_person(Vector3(-4.3, 0, 5), _pick(COATS_MARKET), "adult")
+	_person(Vector3(4.3, 0, 5), _pick(COATS_MARKET), "elder")
+	_person(Vector3(4.3, 0, -13), _pick(COATS_MARKET), "adult")
+	_performer(Vector3(0, 0, -2))
+	for _i in 6:
+		_wanderer(Vector3(_rng.randf_range(-4.5, 4.5), 0, _rng.randf_range(-11, 6)), _pick(COATS_MARKET), 3.5, ["adult", "adult", "teen", "child"][_rng.randi() % 4])
+	# A delivery cart + storage by the Kettle.
+	_cart(Vector3(5.2, 0, 1.5))
+	_crate(Vector3(6.0, 0, 6.5), 0.9)
+	_crate(Vector3(6.0, 0, 7.4), 0.7)
+
+
+func _market_viaduct() -> void:
+	# Piers down both sides of the street carrying a heavy rail deck overhead.
+	for z in range(6, -15, -4):
+		_box(Vector3(1.6, 11, 1.6), Vector3(-5.5, 5.5, float(z)), _mat(BRICK.darkened(0.2)))
+		_box(Vector3(1.6, 11, 1.6), Vector3(5.5, 5.5, float(z)), _mat(BRICK.darkened(0.2)))
+		# Arched brace between the piers.
+		_box(Vector3(11, 0.8, 1.0), Vector3(0, 10.4, float(z)), _mat(BRICK.darkened(0.3)))
+	# The deck + running rails + sleepers.
+	_box(Vector3(13, 0.8, 22), Vector3(0, 11.2, -4), _metal(Color(0.10, 0.10, 0.11)))
+	for zi in range(6, -15, -2):
+		_box(Vector3(9, 0.2, 0.4), Vector3(0, 11.7, float(zi)), _mat(Color(0.14, 0.11, 0.08)))
+	for rx in [-1.6, 1.6]:
+		_box(Vector3(0.2, 0.2, 22), Vector3(rx, 11.8, -4), _metal(Color(0.25, 0.25, 0.27)))
+	# Steam venting from the track down into the market.
+	_steam(Vector3(-2, 11.0, 0))
+	_steam(Vector3(3, 11.0, -8))
+
+
+func _market_building(pos: Vector3, dir_x: float, h: float, sign_color: Color) -> void:
+	var w := 6.0
+	var d := 7.0
+	var wall := BRICK.lerp(STONE, _rng.randf())
+	_box(Vector3(w, h, d), pos + Vector3(0, h * 0.5, 0), _mat(wall))
+	_box(Vector3(w + 0.3, 0.7, d + 0.3), pos + Vector3(0, 0.35, 0), _mat(wall.darkened(0.45)))   # plinth
+	_box(Vector3(w + 0.4, 0.35, d + 0.4), pos + Vector3(0, h + 0.1, 0), _mat(wall.darkened(0.3)))  # cornice
+	var fx := dir_x * w * 0.5
+	# A tall lit doorway on the street-facing side + a stone frame.
+	_box(Vector3(0.5, 2.6, 2.0), pos + Vector3(fx, 1.3, 0), _mat(wall.darkened(0.4)))
+	_box(Vector3(0.22, 2.2, 1.4), pos + Vector3(fx + dir_x * 0.22, 1.1, 0), _emissive(WARM, 1.9))
+	# Framed, lit windows up the face.
+	var floors := int((h - 2.0) / 3.0)
+	for f in range(floors):
+		for wz in [-2.0, 2.0]:
+			var wp := pos + Vector3(fx + dir_x * 0.06, 3.0 + f * 3.0, wz)
+			_box(Vector3(0.16, 0.9, 0.9), wp + Vector3(-dir_x * 0.05, 0, 0), _mat(wall.darkened(0.5)))
+			_box(Vector3(0.12, 0.66, 0.66), wp, _emissive(WARM, 1.5))
+	# Hanging sign over the door.
+	_hanging_sign(pos + Vector3(fx + dir_x * 0.5, 3.4, 0), sign_color)
+
+
+func _market_cloth(a: Vector3, b: Vector3) -> void:
+	_cable(a, b, 0.3)
+	var cloth := [Color(0.55, 0.22, 0.20), Color(0.20, 0.30, 0.34), Color(0.50, 0.42, 0.20), Color(0.36, 0.22, 0.30)]
+	var n := 7
+	for i in range(1, n + 1):
+		var t := float(i) / (n + 1)
+		var p := a.lerp(b, t)
+		p.y -= 0.3 * sin(t * PI) + 0.55
+		_box(Vector3(1.0, 0.9, 0.05), p, _mat(cloth[i % cloth.size()]))
+
+
+func _performer(pos: Vector3) -> void:
+	# A street musician on a crate with a warm follow-glow and a little crowd ring.
+	_crate(pos, 0.6)
+	_person(pos + Vector3(0, 0.6, 0), Color(0.5, 0.3, 0.45), "adult")
+	var l := OmniLight3D.new()
+	l.light_color = WARM
+	l.light_energy = 1.6
+	l.omni_range = 5.0
+	l.position = pos + Vector3(0, 2.2, 0)
+	add_child(l)
+	for a in range(5):
+		var ang := a * TAU / 5.0 + 0.3
+		_person(pos + Vector3(cos(ang) * 2.4, 0, sin(ang) * 2.4), _pick(COATS_MARKET), "adult")
+
+
+func _cart(pos: Vector3) -> void:
+	_box(Vector3(2.4, 0.5, 1.4), pos + Vector3(0, 0.9, 0), _mat(WOOD_COL))
+	_box(Vector3(2.4, 0.6, 0.1), pos + Vector3(0, 1.4, -0.65), _mat(WOOD_COL.darkened(0.2)))
+	for wx in [-1.0, 1.0]:
+		var wheel := CylinderMesh.new()
+		wheel.top_radius = 0.5
+		wheel.bottom_radius = 0.5
+		wheel.height = 0.15
+		var mi := MeshInstance3D.new()
+		mi.mesh = wheel
+		mi.material_override = _metal(Color(0.12, 0.10, 0.09))
+		mi.position = pos + Vector3(wx, 0.5, 0.5)
+		mi.rotation.z = PI * 0.5
+		add_child(mi)
+	_box(Vector3(0.1, 0.1, 1.6), pos + Vector3(0, 0.9, 1.5), _mat(WOOD_COL.darkened(0.3)))  # handle
 
 
 func _sick_neighbor(pos: Vector3) -> void:
