@@ -184,6 +184,16 @@ verb = "Try the door"
 [node name="Shape" type="CollisionShape3D" parent="BrokenBellDoor"]
 shape = SubResource("SphereSmall")
 
+[node name="MartaHomeDoor" type="Area3D" parent="." groups=["interactable"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.8, 1, 11)
+script = ExtResource("7_inter")
+id = "home_door"
+label = "A worker's home"
+verb = "Enter"
+
+[node name="Shape" type="CollisionShape3D" parent="MartaHomeDoor"]
+shape = SubResource("SphereSmall")
+
 [node name="Hud" type="CanvasLayer" parent="."]
 unique_name_in_owner = true
 script = ExtResource("6_hud")

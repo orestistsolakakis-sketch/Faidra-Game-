@@ -114,8 +114,9 @@ func _build_town() -> void:
 	_npc(Vector3(-13, 0, 0.2), Color(0.45, 0.30, 0.35))
 
 	# --- Neighbourhoods filling the blocks between the roads ---
-	# West residential lane (Dara lives here).
+	# West residential lane (Dara lives here) + a home the player can enter (Marta's).
 	_residential_block(Vector3(-11, 0, 15), true)
+	_enterable_home(Vector3(-10, 0, 11), 1.0)
 	_residential_block(Vector3(-31, 0, -2), false)
 	# Apartment / downtown blocks.
 	_downtown_block(Vector3(11, 0, -2))
@@ -671,6 +672,24 @@ func _cart(pos: Vector3) -> void:
 		mi.rotation.z = PI * 0.5
 		add_child(mi)
 	_box(Vector3(0.1, 0.1, 1.6), pos + Vector3(0, 0.9, 1.5), _mat(WOOD_COL.darkened(0.3)))  # handle
+
+
+func _enterable_home(pos: Vector3, dir_x: float) -> void:
+	# A worker's home you can actually walk into (interior: CinderHome.tscn). Marked
+	# with a warm, lit doorway and a smoking stovepipe so it reads as occupied.
+	var w := 6.0
+	var d := 6.0
+	var h := 3.6
+	var wall := BRICK.lerp(COPPER, 0.35)
+	_box(Vector3(w, h, d), pos + Vector3(0, h * 0.5, 0), _mat(wall))
+	_box(Vector3(w + 0.5, 0.5, d + 0.5), pos + Vector3(0, h + 0.2, 0), _mat(Color(0.12, 0.10, 0.09)))  # roof cap
+	_box(Vector3(w + 0.3, 0.6, d + 0.3), pos + Vector3(0, 0.3, 0), _mat(wall.darkened(0.4)))            # plinth
+	var fx := dir_x * w * 0.5
+	_box(Vector3(0.5, 2.5, 1.6), pos + Vector3(fx, 1.25, 0), _mat(wall.darkened(0.4)))                  # door frame
+	_box(Vector3(0.22, 2.1, 1.1), pos + Vector3(fx + dir_x * 0.22, 1.05, 0), _emissive(WARM, 1.8))      # lit doorway
+	_box(Vector3(0.14, 0.8, 0.8), pos + Vector3(fx + dir_x * 0.05, 2.0, 2.0), _emissive(WARM, 1.5))     # window
+	_box(Vector3(0.3, 1.0, 0.3), pos + Vector3(-fx * 0.4, h + 0.5, d * 0.25), _metal(Color(0.08, 0.08, 0.09)))  # stovepipe
+	_smoke(pos + Vector3(-fx * 0.4, h + 1.1, d * 0.25))
 
 
 func _sick_neighbor(pos: Vector3) -> void:

@@ -74,6 +74,8 @@ func _interact(which: Node) -> void:
 			SceneLoader.transition_to("res://scenes/World/CinderUnderground.tscn", GameState.PLAYING)
 		"copper_kettle_door":
 			SceneLoader.transition_to("res://scenes/World/CopperKettle.tscn", GameState.PLAYING)
+		"home_door":
+			SceneLoader.transition_to("res://scenes/World/CinderHome.tscn", GameState.PLAYING)
 		"scrap_exchange_door":
 			_hud.push_toast("", "Shuttered — Old Rennick trades out on the street for now. The Exchange opens later.")
 		"broken_bell_door":
