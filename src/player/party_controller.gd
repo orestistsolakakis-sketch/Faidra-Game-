@@ -8,8 +8,19 @@ extends Node3D
 @export var character_paths: Array[NodePath] = []
 @export var camera_pivot_path: NodePath
 @export var mouse_sensitivity := 0.004
-@export var follow_responsiveness := 12.0
-@export var eye_height := 1.4
+@export var follow_responsiveness := 9.0
+@export var eye_height := 1.55
+
+# --- Cinematic feel (applies in every scene using this rig) ---
+@export_group("Cinematic")
+## Resting field of view; a touch tight for a filmic look.
+@export var base_fov := 55.0
+## Field of view when moving at speed — a subtle "kick" that adds momentum.
+@export var run_fov := 63.0
+## How far the camera drifts ahead in the direction of travel (lower-third framing).
+@export var lead_amount := 0.9
+## Amplitude of the gentle hand-held sway (radians). Keep small.
+@export var sway_amount := 0.004
 
 ## Emitted when control switches to another lead. Arg: that character's id.
 signal active_character_changed(character_id: String)
@@ -17,13 +28,13 @@ signal active_character_changed(character_id: String)
 var _characters: Array = []
 var _pivot: Node3D
 var _spring: SpringArm3D
+var _camera: Camera3D
 var _active_index := 0
 var _yaw := 0.0
-var _pitch := -0.28
+var _pitch := -0.24
 var _spring_len := 4.4
-
-## While a cinematic owns the camera, the follow rig stands down.
-var suspended := false
+var _sway_t := 0.0
+var _lead := Vector3.ZERO
 
 
 func _ready() -> void:
@@ -33,6 +44,9 @@ func _ready() -> void:
 	_spring = _pivot.get_node_or_null("SpringArm3D")
 	if _spring != null:
 		_spring_len = _spring.spring_length
+		_camera = _spring.get_node_or_null("Camera3D")
+	if _camera != null:
+		_camera.fov = base_fov
 
 	for path in character_paths:
 		_characters.append(get_node(path))
@@ -90,13 +104,32 @@ func _process(delta: float) -> void:
 	if _characters.is_empty():
 		return
 
-	# Smoothly follow the active character and apply look rotation.
+	# Smoothly follow the active character with a little lead in the travel direction,
+	# so the framing anticipates movement instead of rigidly tracking the character.
 	var active: Node3D = _characters[_active_index]
 	var t := 1.0 - exp(-follow_responsiveness * delta)
-	_pivot.global_position = _pivot.global_position.lerp(active.global_position + Vector3.UP * eye_height, t)
+	var vel := Vector3.ZERO
+	if active is CharacterBody3D:
+		vel = (active as CharacterBody3D).velocity
+	var flat := Vector3(vel.x, 0.0, vel.z)
+	var speed := flat.length()
+	var lead_target: Vector3 = (flat / speed) * lead_amount if speed > 0.5 else Vector3.ZERO
+	_lead = _lead.lerp(lead_target, 1.0 - exp(-4.0 * delta))
+	var focus := active.global_position + Vector3.UP * eye_height + _lead
+	_pivot.global_position = _pivot.global_position.lerp(focus, t)
 	_pivot.rotation.y = _yaw
 	if _spring != null:
 		_spring.rotation.x = _pitch
+
+	# Speed kicks the FOV out slightly; a gentle hand-held sway keeps it alive.
+	if _camera != null:
+		var target_fov := lerpf(base_fov, run_fov, clampf(speed / 7.5, 0.0, 1.0))
+		_camera.fov = lerpf(_camera.fov, target_fov, 1.0 - exp(-5.0 * delta))
+		_sway_t += delta * (1.0 + speed * 0.15)
+		_camera.rotation = Vector3(
+			sin(_sway_t * 1.1) * sway_amount,
+			sin(_sway_t * 1.7) * sway_amount,
+			sin(_sway_t * 0.7) * sway_amount * 0.5)
 
 
 func _can_control() -> bool:
