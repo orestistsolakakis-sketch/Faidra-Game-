@@ -73,6 +73,8 @@ func _interact(which: Node) -> void:
 			SceneLoader.transition_to("res://scenes/World/CopperKettle.tscn", GameState.PLAYING)
 		"home_door":
 			SceneLoader.transition_to("res://scenes/World/CinderHome.tscn", GameState.PLAYING)
+		"steam_lift":
+			_repair_steam_lift()
 		"scrap_exchange_door":
 			_hud.push_toast("", "Shuttered — Old Rennick trades out on the street for now. The Exchange opens later.")
 		"broken_bell_door":
@@ -86,6 +88,20 @@ func _interact(which: Node) -> void:
 		_:
 			_hud.push_toast("", "Nothing to do here.")
 	_update_prompt()
+
+
+func _repair_steam_lift() -> void:
+	if World.state.get_flag(WorldFacts.Flags.CINDER_STEAM_LIFT_REPAIRED):
+		_hud.push_toast("", "The lift runs steady now. The cage climbs and falls, and steam pours off the gears.")
+		return
+	World.state.set_flag(WorldFacts.Flags.CINDER_STEAM_LIFT_REPAIRED, true)
+	var district := get_node_or_null("District")
+	if district != null and district.has_method("set_steam_lift_running"):
+		district.set_steam_lift_running(true)
+	if World.traits != null:
+		World.traits.adjust(Traits.RESOLVE, 6)
+	_hud.push_toast("WORLD UPDATED", "The seized coupling gives. Steam screams through the pipes and the great cage shudders into motion. Half the Hollow just got its shortcut back — and a foundryman his easier shift.")
+	_hud.set_objective("The Steam Lift runs again. The district feels a little more connected.")
 
 
 func _start_scene(scene_id: String) -> void:

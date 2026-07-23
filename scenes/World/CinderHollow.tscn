@@ -194,6 +194,16 @@ verb = "Enter"
 [node name="Shape" type="CollisionShape3D" parent="MartaHomeDoor"]
 shape = SubResource("SphereSmall")
 
+[node name="SteamLiftPanel" type="Area3D" parent="." groups=["interactable"]]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28.6, 1, 9.4)
+script = ExtResource("7_inter")
+id = "steam_lift"
+label = "The Steam Lift — control housing"
+verb = "Examine / Repair"
+
+[node name="Shape" type="CollisionShape3D" parent="SteamLiftPanel"]
+shape = SubResource("SphereBig")
+
 [node name="Hud" type="CanvasLayer" parent="."]
 unique_name_in_owner = true
 script = ExtResource("6_hud")

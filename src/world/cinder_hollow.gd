@@ -34,6 +34,16 @@ const COATS_DOWN := [Color(0.24, 0.26, 0.32), Color(0.30, 0.28, 0.26), Color(0.2
 
 var _rng := RandomNumberGenerator.new()
 
+# The Steam Lift — a repairable landmark. These refs let the level controller flip it
+# from dead to running, and _process animates the platform when it lives.
+var _lift_platform: MeshInstance3D
+var _lift_core: MeshInstance3D
+var _lift_light: OmniLight3D
+var _lift_steam: GPUParticles3D
+var _lift_running := false
+var _lift_t := 0.0
+var _lift_base := Vector3.ZERO
+
 # Road grid. Vertical roads run along Z; horizontal roads run along X.
 const V_ROADS := [-20.0, 0.0, 20.0]
 const H_ROADS := [8.0, -12.0, -26.0]
@@ -48,6 +58,27 @@ func _ready() -> void:
 	_rng.seed = 71
 	_setup_environment()
 	_build_town()
+	set_steam_lift_running(World.state.get_flag(WorldFacts.Flags.CINDER_STEAM_LIFT_REPAIRED))
+
+
+func _process(delta: float) -> void:
+	# When the lift is alive its platform rides slowly up and down its guides.
+	if not _lift_running or _lift_platform == null:
+		return
+	_lift_t += delta * 0.5
+	_lift_platform.position.y = _lift_base.y + 8.0 + sin(_lift_t) * 7.0
+
+
+## Flip the Steam Lift between dead and running (called by the level controller when
+## Arlen repairs it). Lights, steam and motion come on; the platform starts moving.
+func set_steam_lift_running(on: bool) -> void:
+	_lift_running = on
+	if _lift_core != null:
+		_lift_core.material_override = _emissive(TEAL, 3.0) if on else _mat(Color(0.06, 0.08, 0.09))
+	if _lift_light != null:
+		_lift_light.light_energy = 3.4 if on else 0.0
+	if _lift_steam != null:
+		_lift_steam.emitting = on
 
 
 func _setup_environment() -> void:
@@ -199,6 +230,7 @@ func _landmarks() -> void:
 	_clock_tower(Vector3(-38, 0, 14))
 	_heart_machine(Vector3(31, 0, -14))   # the great glowing engine by the station
 	_gasholder(Vector3(40, 0, 4))
+	_steam_lift(Vector3(24, 0, 6))        # repairable landmark (see CinderHollow.tscn)
 
 
 func _factory_tower(base: Vector3) -> void:
@@ -294,6 +326,94 @@ func _gasholder(base: Vector3) -> void:
 		ring.inner_radius = 8.2
 		ring.outer_radius = 8.7
 		_add(ring, base + Vector3(0, ry, 0), _metal(Color(0.09, 0.09, 0.10)))
+
+
+func _steam_lift(base: Vector3) -> void:
+	# A giant vertical steam elevator: a braced iron tower on a brick base, twin guide
+	# rails, a cage platform that rides between them, a control housing at the foot with
+	# a Lifeline core that glows teal once mended, and steam venting from the gears.
+	_lift_base = base
+	# Brick engine-house base.
+	_box(Vector3(9, 5, 7), base + Vector3(0, 2.5, 0), _mat(BRICK.darkened(0.15)))
+	_box(Vector3(9.5, 0.6, 7.5), base + Vector3(0, 5.1, 0), _mat(STONE.darkened(0.2)))
+	# The tower: four corner columns + cross-bracing up to ~28m.
+	var top := 28.0
+	for cx in [-3.0, 3.0]:
+		for cz in [-2.5, 2.5]:
+			_box(Vector3(0.6, top, 0.6), base + Vector3(cx, 5 + top * 0.5, cz), _metal(Color(0.11, 0.11, 0.12)))
+	for by in range(6, int(top) + 5, 4):
+		_box(Vector3(6.6, 0.35, 0.35), base + Vector3(0, float(by), -2.5), _metal(Color(0.10, 0.10, 0.11)))
+		_box(Vector3(6.6, 0.35, 0.35), base + Vector3(0, float(by), 2.5), _metal(Color(0.10, 0.10, 0.11)))
+		_box(Vector3(0.35, 0.35, 5.4), base + Vector3(-3, float(by), 0), _metal(Color(0.10, 0.10, 0.11)))
+		_box(Vector3(0.35, 0.35, 5.4), base + Vector3(3, float(by), 0), _metal(Color(0.10, 0.10, 0.11)))
+	# Twin guide rails the cage rides on.
+	for gx in [-2.0, 2.0]:
+		_box(Vector3(0.25, top, 0.25), base + Vector3(gx, 5 + top * 0.5, 0), _metal(COPPER.darkened(0.2)))
+	# The cage platform (animated when running).
+	_lift_platform = MeshInstance3D.new()
+	var cage := BoxMesh.new()
+	cage.size = Vector3(5, 0.4, 4.5)
+	_lift_platform.mesh = cage
+	_lift_platform.material_override = _metal(Color(0.16, 0.15, 0.15))
+	_lift_platform.position = base + Vector3(0, 8, 0)
+	add_child(_lift_platform)
+	var rail := BoxMesh.new()
+	rail.size = Vector3(5, 1.4, 0.15)
+	var rm := MeshInstance3D.new()
+	rm.mesh = rail
+	rm.material_override = _metal(Color(0.14, 0.13, 0.13))
+	rm.position = Vector3(0, 0.9, -2.2)
+	_lift_platform.add_child(rm)
+	# Control housing + the Lifeline core (dark until repaired).
+	_box(Vector3(2.0, 2.2, 1.2), base + Vector3(4.6, 1.1, 3.4), _metal(Color(0.13, 0.13, 0.15)))
+	_lift_core = MeshInstance3D.new()
+	var core := SphereMesh.new()
+	core.radius = 0.5
+	core.height = 1.0
+	_lift_core.mesh = core
+	_lift_core.material_override = _mat(Color(0.06, 0.08, 0.09))
+	_lift_core.position = base + Vector3(4.6, 2.4, 3.4)
+	add_child(_lift_core)
+	_lift_light = OmniLight3D.new()
+	_lift_light.light_color = TEAL
+	_lift_light.light_energy = 0.0
+	_lift_light.omni_range = 16.0
+	_lift_light.position = base + Vector3(4.6, 3, 3.4)
+	add_child(_lift_light)
+	# Big pipes + a warning beacon high up.
+	_box(Vector3(1.0, top, 1.0), base + Vector3(-4.2, 5 + top * 0.5, 0), _metal(COPPER.darkened(0.3)))
+	_add_beacon(base + Vector3(0, top + 6, 0), WARM)
+	# Steam that only vents once the machinery turns (kept, toggled via emitting).
+	_lift_steam = _steam_handle(base + Vector3(0, 5.5, 0))
+	_lift_steam.emitting = false
+
+
+func _steam_handle(pos: Vector3) -> GPUParticles3D:
+	var p := GPUParticles3D.new()
+	p.amount = 20
+	p.lifetime = 2.6
+	p.position = pos
+	p.local_coords = false
+	var mat := ParticleProcessMaterial.new()
+	mat.direction = Vector3(0, 1, 0)
+	mat.spread = 14.0
+	mat.initial_velocity_min = 1.0
+	mat.initial_velocity_max = 2.0
+	mat.gravity = Vector3(0.3, 0.4, 0)
+	mat.scale_min = 0.8
+	mat.scale_max = 2.0
+	p.process_material = mat
+	var quad := QuadMesh.new()
+	quad.size = Vector2(1, 1)
+	var qmat := StandardMaterial3D.new()
+	qmat.albedo_color = Color(0.85, 0.88, 0.92, 0.14)
+	qmat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	qmat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	qmat.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+	quad.material = qmat
+	p.draw_pass_1 = quad
+	add_child(p)
+	return p
 
 
 func _add_beacon(pos: Vector3, color: Color) -> void:
